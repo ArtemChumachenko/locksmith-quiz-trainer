@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Locksmith Exam Trainer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: #f3f4f6;
+        color: #111827;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+      }
+      .app {
+        min-height: 100vh;
+        display: flex;
+      }
+      aside {
+        width: 260px;
+        background: #111827;
+        color: #e5e7eb;
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .logo {
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: 0.03em;
+      }
+      .topic-list {
+        margin-top: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        font-size: 0.95rem;
+      }
+      .topic-btn {
+        border: none;
+        padding: 0.45rem 0.7rem;
+        border-radius: 0.5rem;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+      .topic-btn:hover {
+        background: #1f2937;
+      }
+      .topic-btn.active {
+        background: #f59e0b;
+        color: #111827;
+        font-weight: 600;
+      }
+      main {
+        flex: 1;
+        padding: 1.5rem;
+        max-width: 960px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .topic-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #111827;
+      }
+      .progress {
+        font-size: 0.9rem;
+        color: #4b5563;
+      }
+      .card {
+        background: #ffffff;
+        border-radius: 0.75rem;
+        padding: 1.25rem 1.4rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      }
+      .question-text {
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+      }
+      .options {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      .option-item {
+        border-radius: 0.6rem;
+        border: 1px solid #e5e7eb;
+        padding: 0.55rem 0.75rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+        cursor: pointer;
+        transition: border-color 0.12s ease, background 0.12s ease;
+      }
+      .option-item:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+      }
+      .option-item.correct {
+        border-color: #16a34a;
+        background: #f0fdf4;
+      }
+      .option-item.incorrect {
+        border-color: #dc2626;
+        background: #fef2f2;
+      }
+      .option-letter {
+        font-weight: 600;
+        margin-top: 0.05rem;
+        min-width: 1.6rem;
+      }
+      .option-label {
+        flex: 1;
+        font-size: 0.98rem;
+      }
+      .controls {
+        margin-top: 1rem;
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      button.primary {
+        border: none;
+        border-radius: 999px;
+        background: #2563eb;
+        color: #ffffff;
+        padding: 0.5rem 1.3rem;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: background 0.15s ease, transform 0.05s ease;
+      }
+      button.primary:hover {
+        background: #1d4ed8;
+        transform: translateY(-0.5px);
+      }
+      button.secondary {
+        border-radius: 999px;
+        border: 1px solid #d1d5db;
+        background: #ffffff;
+        color: #111827;
+        padding: 0.45rem 1.15rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: background 0.12s ease, border-color 0.12s ease;
+      }
+      button.secondary:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+      }
+      .feedback {
+        margin-top: 0.6rem;
+        font-size: 0.95rem;
+        min-height: 1.4rem;
+      }
+      .feedback.correct {
+        color: #15803d;
+      }
+      .feedback.incorrect {
+        color: #b91c1c;
+      }
+      .score-pill {
+        border-radius: 999px;
+        padding: 0.15rem 0.75rem;
+        background: #e5e7eb;
+        font-size: 0.85rem;
+        color: #374151;
+      }
+      @media (max-width: 768px) {
+        .app {
+          flex-direction: column;
+        }
+        aside {
+          width: 100%;
+          flex-direction: row;
+          align-items: center;
+          gap: 0.75rem;
+          overflow-x: auto;
+        }
+        .topic-list {
+          flex-direction: row;
+        }
+        main {
+          padding: 1rem;
+        }
+        .card {
+          padding: 1rem 1.1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside>
+        <div class="logo">🔐 Locksmith Exam Trainer</div>
+        <div class="topic-list" id="topicList"></div>
+      </aside>
+
+      <main>
+        <div class="top-bar">
+          <div class="topic-title" id="topicTitle">Select a topic</div>
+          <div class="progress" id="progressText"></div>
+        </div>
+
+        <div class="card">
+          <div class="question-text" id="questionText">
+            Choose a topic on the left to start the quiz.
+          </div>
+          <ul class="options" id="optionsList"></ul>
+          <div class="controls">
+            <button class="primary" id="checkBtn" disabled>✅ Check</button>
+            <button class="secondary" id="nextBtn" disabled>
+              Next question →
+            </button>
+            <span class="score-pill" id="scoreText"></span>
+          </div>
+          <div class="feedback" id="feedback"></div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      // ===== 1. Data: topics & questions ==================================
+
+      const quizData = {
+        "Working as a Professional Locksmith": [
+          {
+            question:
+              "What's the advantage of going to a locksmith to duplicate a key rather than using a self-serve store kiosk?",
+            options: [
+              "Locksmiths are able to duplicate keys much more cheaply than kiosks.",
+              "Keys made from kiosks typically break within the first three months.",
+              "Kiosks only allow you to make a single copy of a key.",
+              "Locksmiths offer a much wider variety of key blanks.",
+            ],
+            correctIndex: 3,
+          },
+          {
+            question:
+              "When would a company with an onsite safe typically need the services of a locksmith?",
+            options: [
+              "When there are more than the usual amount of valuables inside it",
+              "Every year, to comply with federal law",
+              "Only after a security incident such as an attempted break-in",
+              "When one or more employees leave the company",
+            ],
+            correctIndex: 3,
+          },
+          {
+            question:
+              "What does the largest portion of a locksmith's business come from?",
+            options: [
+              "Repairing damaged locks",
+              "Helping locked-out drivers get back into their cars",
+              "Installing burglar alarms at commercial locations",
+              "Residential front door lock installations and replacements",
+            ],
+            correctIndex: 3,
+          },
+          {
+            question:
+              "What role does burglar alarm installation play for a locksmith?",
+            options: [
+              "It's becoming less an area of focus as more customers use dedicated home security companies.",
+              "It's a growing area of specialization for locksmiths as the demand for burglar alarms rises.",
+              "It's typically not an area of focus because alarms require specialized electrical and wiring knowledge.",
+              "It's a declining area as more residential customers purchase easy-to-use wifi monitoring systems.",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question:
+              "What approach do most locksmiths take regarding specialization?",
+            options: [
+              "Focus on as many areas as possible to get the most business.",
+              "Focus on just one specific type of key and lock.",
+              "Learn all there is to know about all locks, then select an area of interest.",
+              "Focus on just one or two areas of locksmithing and become very good at those.",
+            ],
+            correctIndex: 3,
+          },
+          {
+            question:
+              "What do recent statistics show about burglaries in homes and retail locations?",
+            options: [
+              "Most burglars are skilled with picking locks and bypassing security measures.",
+              "Most burglaries occur in retail settings rather than residential settings.",
+              "Most burglaries are violent crimes in which the burglar is armed and dangerous.",
+              "Most burglars are amateurs with no training who are just taking advantage of a vulnerability.",
+            ],
+            correctIndex: 3,
+          },
+          {
+            question:
+              "You notice that a security company is looking for a locksmith who focuses on security consulting. What should you expect the majority of your work to include?",
+            options: [
+              "Installing locks and security systems onsite",
+              "Repairing damaged locks and helping customers when they're locked out",
+              "Developing new security products for the industry",
+              "Offering recommendations on products and techniques that can improve security",
+            ],
+            correctIndex: 3,
+          },
+          {
+            question:
+              "What can you as a locksmith do proactively to help prevent crime?",
+            options: [
+              "Learn as much about every type of lock as possible.",
+              "Show up as quickly as possible when receiving a call about a security problem.",
+              "Focus on relatively safe neighborhoods with historically lower crime rates.",
+              "Stay current on crime trends and new product developments and offer recommendations.",
+            ],
+            correctIndex: 3,
+          },
+          {
+            question:
+              "You are arriving at the residence of a new customer for the first time. What's the best way to conduct yourself?",
+            options: [
+              "Focus primarily on getting the work done quickly and minimizing the interactions.",
+              "Point out any problems you find from prior locksmiths to help portray yourself as a true expert.",
+              "Respect the customer's privacy by minimizing your questions and speak only if asked.",
+              "Keep your level of interaction high and demonstrate your personal skills just as strongly as your technical skills.",
+            ],
+            correctIndex: 3,
+          },
+          {
+            question:
+              "What approach should you take regarding the tools and equipment in your vehicle when making a service call?",
+            options: [
+              "Organize your gear only in a way that allows you to complete the job as quickly as possible.",
+              "Store your gear however you're most comfortable; customers only care that the job is done well.",
+              "Try to travel with minimal gear so that there's never an opportunity to look disorganized.",
+              "Everything needs to look clean and organized, even if it takes extra effort to do so.",
+            ],
+            correctIndex: 3,
+          },
+          {
+            question:
+              "What physical requirements exist for someone who is interested in the locksmithing profession?",
+            options: [
+              "Having 20/20 vision or better without the assistance of corrective lenses",
+              "The ability to lift and carry up to 25 pounds without assistance",
+              "Extremely good hearing and hand-eye coordination",
+              "None, as long as you have the ability to see small parts clearly",
+            ],
+            correctIndex: 3,
+          },
+          {
+            question:
+              "A customer calls you with an urgent request, but you can't accommodate her because you're on another job. What should you do?",
+            options: [
+              "Ask the customer you're currently working for if they mind if you leave to help the caller, and then quickly return.",
+              "Tell the caller to sit tight, and that you'll give her a call back when you're done with your current job.",
+              "Ask her if she wouldn't mind calling you again in about an hour, since that's when you expect you'll be free.",
+              "Recommend another locksmith who might be able to help immediately and show your appreciation for calling.",
+            ],
+            correctIndex: 3,
+          },
+          {
+            question:
+              "What becomes more important for a locksmith serving a rather small community than a locksmith in a large city?",
+            options: [
+              "Offering good prices",
+              "Having a reputation as being friendly",
+              "Being prompt when a call is received",
+              "Offering a wider variety of services",
+            ],
+            correctIndex: 1,
+          },
+          {
+            question:
+              "A customer urgently calls you because he is locked out of his house and needs your help. What's the most important thing for you to confirm before you open the door for him?",
+            options: [
+              "That the customer is able to pay for your services",
+              "That someone will be there waiting when you arrive",
+              "That the person who called you is the person waiting for you when you arrive",
+              "That the customer has provided you proof of ownership before you open the door",
+            ],
+            correctIndex: 3,
+          },
+        ],
+
+        // 👉 сюда потом можно добавить остальные темы:
+        // "Introduction to Locks and Keys": [ ... ],
+        // "Using Tools Safely": [ ... ],
+        // и т.д.
+      };
+
+      // ===== 2. State ==================================
+
+      let currentTopic = null;
+      let currentIndex = 0;
+      let selectedIndex = null;
+      let checked = false;
+
+      const scores = {}; // { topic: { correct: n, total: m } }
+
+      // ===== 3. DOM refs ==================================
+
+      const topicListEl = document.getElementById("topicList");
+      const topicTitleEl = document.getElementById("topicTitle");
+      const progressTextEl = document.getElementById("progressText");
+      const questionTextEl = document.getElementById("questionText");
+      const optionsListEl = document.getElementById("optionsList");
+      const checkBtn = document.getElementById("checkBtn");
+      const nextBtn = document.getElementById("nextBtn");
+      const feedbackEl = document.getElementById("feedback");
+      const scoreTextEl = document.getElementById("scoreText");
+
+      // ===== 4. Render topics sidebar ====================
+
+      function renderTopics() {
+        topicListEl.innerHTML = "";
+        Object.keys(quizData).forEach((topicName, idx) => {
+          const btn = document.createElement("button");
+          btn.textContent = topicName;
+          btn.className = "topic-btn" + (idx === 0 ? " active" : "");
+          btn.addEventListener("click", () => selectTopic(topicName));
+          topicListEl.appendChild(btn);
+        });
+
+        // auto-select first topic
+        const firstTopic = Object.keys(quizData)[0];
+        if (firstTopic) {
+          selectTopic(firstTopic);
+        }
+      }
+
+      // ===== 5. Topic selection ==========================
+
+      function selectTopic(topicName) {
+        currentTopic = topicName;
+        currentIndex = 0;
+        selectedIndex = null;
+        checked = false;
+
+        // update active button
+        Array.from(topicListEl.children).forEach((btn) => {
+          btn.classList.toggle("active", btn.textContent === topicName);
+        });
+
+        if (!scores[currentTopic]) {
+          scores[currentTopic] = { correct: 0, total: 0 };
+        }
+
+        renderQuestion();
+      }
+
+      // ===== 6. Render question ==========================
+
+      function renderQuestion() {
+        const questions = quizData[currentTopic];
+        const q = questions[currentIndex];
+
+        topicTitleEl.textContent = currentTopic;
+        progressTextEl.textContent = `Question ${currentIndex + 1} of ${
+          questions.length
+        }`;
+
+        questionTextEl.textContent = q.question;
+        optionsListEl.innerHTML = "";
+        feedbackEl.textContent = "";
+        feedbackEl.className = "feedback";
+        selectedIndex = null;
+        checked = false;
+
+        q.options.forEach((opt, idx) => {
+          const li = document.createElement("li");
+          li.className = "option-item";
+
+          const radio = document.createElement("input");
+          radio.type = "radio";
+          radio.name = "option";
+          radio.value = idx;
+          radio.style.marginTop = "0.2rem";
+
+          radio.addEventListener("change", () => {
+            selectedIndex = idx;
+            // remove highlight from all
+            Array.from(optionsListEl.children).forEach((item) =>
+              item.classList.remove("selected")
+            );
+            li.classList.add("selected");
+            feedbackEl.textContent = "";
+            feedbackEl.className = "feedback";
+          });
+
+          const letterSpan = document.createElement("span");
+          letterSpan.className = "option-letter";
+          letterSpan.textContent = String.fromCharCode(65 + idx) + ")";
+
+          const labelSpan = document.createElement("span");
+          labelSpan.className = "option-label";
+          labelSpan.textContent = opt;
+
+          li.appendChild(radio);
+          li.appendChild(letterSpan);
+          li.appendChild(labelSpan);
+          optionsListEl.appendChild(li);
+        });
+
+        checkBtn.disabled = false;
+        nextBtn.disabled = true;
+        updateScorePill();
+      }
+
+      // ===== 7. Check answer =============================
+
+      function checkAnswer() {
+        if (selectedIndex === null || checked) return;
+
+        const questions = quizData[currentTopic];
+        const q = questions[currentIndex];
+        const correctIdx = q.correctIndex;
+
+        const items = Array.from(optionsListEl.children);
+
+        items.forEach((li, idx) => {
+          li.classList.remove("correct", "incorrect");
+          if (idx === correctIdx) {
+            li.classList.add("correct");
+          } else if (idx === selectedIndex && idx !== correctIdx) {
+            li.classList.add("incorrect");
+          }
+        });
+
+        const isCorrect = selectedIndex === correctIdx;
+        const topicScore = scores[currentTopic];
+
+        topicScore.total += 1;
+        if (isCorrect) {
+          topicScore.correct += 1;
+          feedbackEl.textContent = "Correct ✅";
+          feedbackEl.className = "feedback correct";
+        } else {
+          feedbackEl.textContent =
+            "Not quite ❌  Correct answer: " +
+            String.fromCharCode(65 + correctIdx) +
+            ")";
+          feedbackEl.className = "feedback incorrect";
+        }
+
+        checked = true;
+        updateScorePill();
+        nextBtn.disabled = currentIndex >= questions.length - 1;
+      }
+
+      // ===== 8. Next question ============================
+
+      function nextQuestion() {
+        const questions = quizData[currentTopic];
+        if (currentIndex < questions.length - 1) {
+          currentIndex += 1;
+          renderQuestion();
+        }
+      }
+
+      // ===== 9. Score pill ===============================
+
+      function updateScorePill() {
+        const topicScore = scores[currentTopic];
+        if (!topicScore || topicScore.total === 0) {
+          scoreTextEl.textContent = "";
+          return;
+        }
+        const pct = Math.round((topicScore.correct / topicScore.total) * 100);
+        scoreTextEl.textContent = `Score for "${currentTopic}": ${topicScore.correct}/${topicScore.total} (${pct}%)`;
+      }
+
+      // ===== 10. Event listeners =========================
+
+      checkBtn.addEventListener("click", checkAnswer);
+      nextBtn.addEventListener("click", nextQuestion);
+
+      // Init
+      renderTopics();
+    </script>
+  </body>
+</html>
