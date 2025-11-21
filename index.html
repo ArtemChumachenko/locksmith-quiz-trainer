@@ -42,6 +42,11 @@
         gap: 0.35rem;
         font-size: 0.95rem;
       }
+      .topic-list.secondary {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+}
+
       .topic-btn {
         border: none;
         padding: 0.45rem 0.7rem;
@@ -220,10 +225,14 @@
   </head>
   <body>
     <div class="app">
-      <aside>
-        <div class="logo">🔐 Locksmith Exam Trainer</div>
-        <div class="topic-list" id="topicList"></div>
-      </aside>
+     <aside>
+  <div class="logo">🔐 Locksmith Exam Trainer</div>
+  <!-- Верхний ряд: модули (имена файлов) -->
+  <div class="topic-list" id="moduleList"></div>
+  <!-- Нижний ряд: подтемы внутри выбранного модуля -->
+  <div class="topic-list secondary" id="topicList"></div>
+</aside>
+
 
       <main>
         <div class="top-bar">
@@ -249,997 +258,1039 @@
     </div>
 
     <script>
-      // ===== 1. Data: topics & questions ==================================
-
-     const quizData = {
-  "Working as a Professional Locksmith": [
-    {
-      question:
-        "What's the advantage of going to a locksmith to duplicate a key rather than using a self-serve store kiosk?",
-      options: [
-        "Locksmiths are able to duplicate keys much more cheaply than kiosks.",
-        "Keys made from kiosks typically break within the first three months.",
-        "Kiosks only allow you to make a single copy of a key.",
-        "Locksmiths offer a much wider variety of key blanks."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "When would a company with an onsite safe typically need the services of a locksmith?",
-      options: [
-        "When there are more than the usual amount of valuables inside it",
-        "Every year, to comply with federal law",
-        "Only after a security incident such as an attempted break-in",
-        "When one or more employees leave the company"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "What does the largest portion of a locksmith's business usually come from?",
-      options: [
-        "Repairing damaged locks",
-        "Helping locked-out drivers get back into their cars",
-        "Installing burglar alarms at commercial locations",
-        "Residential front door lock installations and replacements"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "What role does burglar alarm installation play for a locksmith?",
-      options: [
-        "It's becoming less important as more customers use dedicated home security companies.",
-        "It's a growing area of specialization for locksmiths as the demand for burglar alarms rises.",
-        "It's typically not an area of focus because alarms require specialized electrical and wiring knowledge.",
-        "It's a declining area as more residential customers purchase easy-to-use wifi monitoring systems."
-      ],
-      correctIndex: 1
-    },
-    {
-      question:
-        "What approach do most locksmiths take regarding specialization?",
-      options: [
-        "Focus on as many areas as possible to get the most business.",
-        "Focus on just one specific type of key and lock.",
-        "Learn all there is to know about all locks, then select an area of interest.",
-        "Focus on just one or two areas of locksmithing and become very good at those."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "What do recent statistics show about burglaries in homes and retail locations?",
-      options: [
-        "Most burglars are skilled at picking locks and bypassing security measures.",
-        "Most burglaries occur in retail settings rather than residential settings.",
-        "Most burglaries are violent crimes in which the burglar is armed and dangerous.",
-        "Most burglars are amateurs with no training who are just taking advantage of a vulnerability."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "A security company is looking for a locksmith who focuses on security consulting. What should you expect most of your work to include?",
-      options: [
-        "Installing locks and security systems onsite",
-        "Repairing damaged locks and helping customers when they're locked out",
-        "Developing new security products for the industry",
-        "Offering recommendations on products and techniques that can improve security"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "What can you as a locksmith do proactively to help prevent crime?",
-      options: [
-        "Learn as much about every type of lock as possible.",
-        "Show up as quickly as possible when receiving a call about a security problem.",
-        "Focus on relatively safe neighborhoods with historically lower crime rates.",
-        "Stay current on crime trends and new product developments and offer recommendations."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "You are arriving at the residence of a new customer for the first time. What's the best way to conduct yourself?",
-      options: [
-        "Focus primarily on getting the work done quickly and minimizing interactions.",
-        "Point out any problems you find from prior locksmiths to help portray yourself as a true expert.",
-        "Respect the customer's privacy by minimizing your questions and only answering when asked.",
-        "Keep your level of interaction high and demonstrate your personal skills just as strongly as your technical skills."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "What approach should you take regarding the tools and equipment in your vehicle when making a service call?",
-      options: [
-        "Organize your gear only in a way that allows you to complete the job as quickly as possible.",
-        "Store your gear however you're most comfortable; customers only care that the job is done well.",
-        "Try to travel with minimal gear so that there's never an opportunity to look disorganized.",
-        "Everything needs to look clean and organized, even if it takes extra effort to do so."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "What physical requirements exist for someone who is interested in the locksmithing profession?",
-      options: [
-        "Having 20/20 vision or better without corrective lenses",
-        "The ability to lift and carry up to 25 pounds without assistance",
-        "Extremely good hearing and hand-eye coordination",
-        "None, as long as you have the ability to see small parts clearly"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "A customer calls you with an urgent request, but you can't accommodate her because you're on another job. What should you do?",
-      options: [
-        "Ask the customer you're currently working for if they mind if you leave to help the caller, and then quickly return.",
-        "Tell the caller to sit tight, and that you'll call her back when you're done with your current job.",
-        "Ask her if she wouldn't mind calling you again in about an hour, since that's when you expect you'll be free.",
-        "Recommend another locksmith who might be able to help immediately and show your appreciation for calling."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "What becomes more important for a locksmith serving a rather small community than for a locksmith in a large city?",
-      options: [
-        "Offering good prices",
-        "Having a reputation as being friendly",
-        "Being prompt when a call is received",
-        "Offering a wider variety of services"
-      ],
-      correctIndex: 1
-    },
-    {
-      question:
-        "A customer urgently calls because he is locked out of his house and needs your help. What's the most important thing to confirm before you open the door?",
-      options: [
-        "That the customer is able to pay for your services",
-        "That someone will be there waiting when you arrive",
-        "That the person who called you is the person waiting when you arrive",
-        "That the customer has provided proof of ownership before you open the door"
-      ],
-      correctIndex: 3
-    }
-  ],
-
-  "Introduction to Locks and Keys": [
-    {
-      question: "What security feature does a double-cylinder lock provide?",
-      options: [
-        "It requires two separate keys to be unlocked.",
-        "It requires both a key and a numeric passcode.",
-        "It's impossible to pick because of its construction.",
-        "It can be locked on either side with a key."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "What problem can result from the strike not being secured tightly enough?",
-      options: [
-        "The lock can more easily be picked with a hairpin or paperclip.",
-        "The key is more prone to breaking off inside the cylinder.",
-        "The doorknob is likely to loosen over time and possibly even fall off.",
-        "The lock can be bypassed by kicking the door in."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "What is the most commonly used type of key in homes and cars today?",
-      options: ["A tubular key", "A bit key", "A barrel key", "A cylinder key"],
-      correctIndex: 3
-    },
-    {
-      question:
-        "If a customer calls because she is unable to find the key to her luggage, what lock mechanism are you most likely to encounter?",
-      options: [
-        "A warded lock mechanism",
-        "A disc tumbler mechanism",
-        "A pin tumbler mechanism",
-        "A lever tumbler mechanism"
-      ],
-      correctIndex: 1
-    },
-    {
-      question: "What mechanism allows a combination padlock to operate?",
-      options: [
-        "A series of tumblers needs to be aligned in just the right way.",
-        "A set of flat metal plates must slide into just the right place.",
-        "A cylinder containing rectangular metal disks must be raised to the correct level.",
-        "A row of pins are moved up and down to the correct height."
-      ],
-      correctIndex: 0
-    },
-    {
-      question:
-        "What should be the first thing you ask when a customer asks you to recommend a lock?",
-      options: [
-        "What is the customer's budget?",
-        "When does the customer need it installed?",
-        "What is wrong with the current lock being used?",
-        "What is the purpose of the lock?"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "If you're recommending door security for a hospital or a facility that handicapped persons are likely to use, what type of lockset should you suggest?",
-      options: [
-        "An entrance handleset",
-        "A key-in-knob lock",
-        "A narrow stile lock",
-        "A lever lock"
-      ],
-      correctIndex: 3
-    },
-    {
-      question: "What is the defining quality of an auxiliary lock?",
-      options: [
-        "It operates by recognizing a chip embedded in the key.",
-        "It features a rotating piece of metal at the back of the lock plug.",
-        "It's an extra lock that's added for backup security.",
-        "It's secured with a bolt and can't be picked."
-      ],
-      correctIndex: 2
-    },
-    {
-      question: "What is a cam lock most often used to secure?",
-      options: ["A car", "A typical home", "A shed or outside structure", "A desk or cabinet"],
-      correctIndex: 3
-    },
-    {
-      question: "What does a key code allow a locksmith to do?",
-      options: [
-        "Change the combination to a safe",
-        "Rekey a lock on a front door",
-        "Make a copy of a key without the original",
-        "Reprogram the key fob to lock and unlock a car"
-      ],
-      correctIndex: 2
-    },
-    {
-      question:
-        "Which locksmithing procedure involves turning a key blank in a lock, examining the marks, and cutting the key along those marks?",
-      options: ["Lockpicking", "Rekeying", "Reading", "Impressioning"],
-      correctIndex: 3
-    },
-    {
-      question:
-        "A customer calls and asks for his front and back doors to be rekeyed. What will you need to do?",
-      options: [
-        "Change the internal mechanism of both locks to fit a new key",
-        "Reprogram the electronic keypads on both doors to accept a new combination",
-        "Change out the entire lock body and strike for both doors",
-        "Create two more duplicates of the key, one for each door"
-      ],
-      correctIndex: 0
-    },
-    {
-      question:
-        "In what type of situation would a 'Slim Jim' be particularly useful?",
-      options: [
-        "Picking a front door lock of a house",
-        "Removing a broken key from a cylinder",
-        "Rekeying or repairing a lock cylinder",
-        "Opening a locked car door"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "You're tasked with installing locks on several metal cabinet doors and drawers. What tool should you be sure to bring?",
-      options: ["A plug spinner", "A pinning kit", "A hole saw kit", "A double-D punch"],
-      correctIndex: 3
-    }
-  ],
-
-  "Using Tools Safely": [
-    {
-      question:
-        "Sergio is a locksmith who operates in a professional manner. What distinguishes him from an amateur in the way he uses his tools?",
-      options: [
-        "He treats them with care and respect and puts them away properly.",
-        "He buys the most expensive tools.",
-        "He always knows where his tools are.",
-        "He has nearly every tool conceivable in his field."
-      ],
-      correctIndex: 0
-    },
-    {
-      question:
-        "Marcela is using a screwdriver whose tip doesn't fit the slot properly. What is the correct procedure?",
-      options: [
-        "Find another screwdriver that does fit properly.",
-        "Use more leverage.",
-        "Pay particular attention to avoid slippage.",
-        "Use a piece of cloth to decrease the slot size and add friction."
-      ],
-      correctIndex: 0
-    },
-    {
-      question: "What is the 'duty rating' of a ladder?",
-      options: [
-        "How much weight it can hold",
-        "The maximum length it should be extended",
-        "The conditions it's rated for (such as rain or snow)",
-        "The sort of job it's designed for (such as electrical or carpentry)"
-      ],
-      correctIndex: 0
-    },
-    {
-      question: "A ground fault occurs when:",
-      options: [
-        "Ground isn't present.",
-        "A ground lift adapter is being used.",
-        "A hot wire and ground are connected.",
-        "Neutral and ground are on the same wire."
-      ],
-      correctIndex: 2
-    },
-    {
-      question: "How many centimeters are in one meter?",
-      options: ["100", "0.1", "1,000", "10"],
-      correctIndex: 0
-    },
-    {
-      question: "One kilogram is approximately how many pounds?",
-      options: ["2.2", "0.6", "11", "5.1"],
-      correctIndex: 0
-    },
-    {
-      question: "What is the formula to calculate Celsius temperature in Fahrenheit?",
-      options: [
-        "F = 1.8C + 32",
-        "F = 2.5C",
-        "F = 9.0C + 12",
-        "F = 32 + C"
-      ],
-      correctIndex: 0
-    },
-    {
-      question:
-        "Which of the following best describes what you would use a pinning kit for?",
-      options: [
-        "Picking a lock",
-        "Opening a car door",
-        "Cutting a new key",
-        "Replacing / rekeying a pin tumbler lock"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "Which of the following is the best description of when you would use a tension wrench?",
-      options: [
-        "When replacing a pin tumbler lock",
-        "When opening a locked car",
-        "When rekeying a lock",
-        "When picking a lock"
-      ],
-      correctIndex: 3
-    },
-    {
-      question: "How does an otoscope help a locksmith?",
-      options: [
-        "By providing diffuse light to see the keyway",
-        "By providing pressure on the lock plug",
-        "By providing a dark background behind the keyway mechanism",
-        "By providing focused light to see the keyway"
-      ],
-      correctIndex: 3
-    },
-    {
-      question: "A follower dowel is another name for a:",
-      options: [
-        "Otoscope follower",
-        "Tension wrench follower",
-        "Lock pick follower",
-        "Plug follower"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "Why is a car wedge an important tool for opening a locked car?",
-      options: [
-        "It slides between the lower part of the car window and its trim and directly opens the lock.",
-        "It creates a vacuum between the lower part of the car window and its trim, which opens the lock when removed.",
-        "It can bypass newer antitheft doors that have a guard plate over the locking mechanism.",
-        "It creates a space between the lower part of the car window and its trim for inserting another tool to open the lock."
-      ],
-      correctIndex: 3
-    }
-  ],
-
-  "Identifying Keys": [
-    {
-      question:
-        "For a duplicate key to work in a customer's lock, the blade of the ______ must be exactly the same as the customer's original in millings and size.",
-      options: ["Master key", "Spare key", "Original equipment manufacturer", "Key blank"],
-      correctIndex: 3
-    },
-    {
-      question:
-        "An aftermarket key is much cheaper to produce but has a/an ______ tolerance than an OEM key.",
-      options: ["Higher", "Medium", "Equal", "Lower"],
-      correctIndex: 0
-    },
-    {
-      question:
-        "Key types refer to the ______ of the lock and, more important, the mechanism inside the lock.",
-      options: ["Pins", "Manufacturer", "Specialty use", "Probable application"],
-      correctIndex: 3
-    },
-    {
-      question: "What are the four configurations of key/lock interaction?",
-      options: [
-        "Tubular key, 2-track key, 4-track key, patented key",
-        "Single side, double side, tubular, neuter bow",
-        "Bit, barrel, flat steel, single side",
-        "Single side, single side convenience, double side, double side convenience"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "A ______ stop at the end of the key uses the rear of the lock to halt the key from being pushed any further into the lock.",
-      options: ["Shoulder", "Blade", "Bow", "Tip"],
-      correctIndex: 3
-    },
-    {
-      question:
-        "A ______ is a cut placed on the blade of the bit or barrel key that doesn't operate any internal part in a lock but is placed to bypass blockage inside the lock.",
-      options: ["Post hole", "Shank", "Bitting", "Ward cut"],
-      correctIndex: 3
-    },
-    {
-      question:
-        "The profile or ______ is a cross section of the key blade when you're looking from bow to tip to get a visual reference representative of the keyway of the lock.",
-      options: ["Key section", "Throat cut", "Tip angle", "Silhouette"],
-      correctIndex: 0
-    },
-    {
-      question: "What are the three basic methods used to identify keys?",
-      options: [
-        "Looking at the bow shape, looking at the tip angle, looking at the key section",
-        "Looking at the key section, looking at the stop, looking at the bittings",
-        "Looking at the tip angle, names or references on the key, looking at the key patterns",
-        "Looking at the bow shape, names or references on the key, looking at the key section"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "Manufacturers spend time and money making sure their bow shape is easy to identify because:",
-      options: [
-        "It helps the locksmith.",
-        "It strengthens the key tolerance.",
-        "It prevents theft.",
-        "It's a form of advertising."
-      ],
-      correctIndex: 3
-    },
-    {
-      question: "There is no shortcut to:",
-      options: [
-        "Producing key sections.",
-        "Key bow recognition.",
-        "ILCO identification.",
-        "Key brand recognition."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "Most aftermarket key blank manufacturers produce a ______.",
-      options: [
-        "Parts directory",
-        "Key index",
-        "Key cross-reference directory",
-        "Key blank catalog"
-      ],
-      correctIndex: 3
-    },
-    {
-      question: "Where is the key index usually found?",
-      options: [
-        "In the back of the catalog",
-        "At the beginning of each section in the catalog",
-        "In its own separate catalog",
-        "In the front of the catalog"
-      ],
-      correctIndex: 0
-    },
-    {
-      question:
-        "The key profile represents the _______, where you would insert the key.",
-      options: ["Blade", "Blank", "Family", "Lock"],
-      correctIndex: 3
-    },
-    {
-      question:
-        "During the ______ process, you take a non-ILCO brand key and find the ILCO equivalent.",
-      options: ["Key indexing", "Search", "Cataloging", "Cross-referencing"],
-      correctIndex: 3
-    }
-  ],
-
-  "Keymaking": [
-    {
-      question:
-        "Which of the following statements describes the basic operation of a manual key duplicator?",
-      options: [
-        "The locksmith marks the key by hand and then places it into a jaw set.",
-        "The locksmith rotates a cutter wheel, which follows the pattern of the customer's key and transfers it to the key blank.",
-        "The locksmith uses their hands to put pressure on the blade to ensure the pattern transfers correctly.",
-        "The locksmith moves a carriage to allow a stylus to trace the original and a blade to cut the key blank to match."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "What is the one major difference between the manual key duplicator and the semi-automatic key duplicator?",
-      options: [
-        "A lever moves the stylus and the blade in unison for better accuracy.",
-        "A lever moves a spring that pulls the carriage into the stylus and traces the customer's key.",
-        "A lever moves the blade back and forth to remove material from the key blank.",
-        "A lever moves the carriage so that the locksmith doesn't have his or her hands on the carriage or the blade."
-      ],
-      correctIndex: 1
-    },
-    {
-      question:
-        "Which of these describes how the fully automatic key duplicator works?",
-      options: [
-        "The locksmith pulls a lever attached to a carriage, which moves the blade back and forth automatically.",
-        "The locksmith rotates a cutter wheel that follows the pattern of the customer's key.",
-        "The locksmith loads the customer key and the key blank into their positions and releases a spring that engages the blade and stylus automatically.",
-        "The locksmith presses a button and lets the machine duplicate the key automatically."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "Why should a locksmith have one key duplicator option in addition to the fully automatic key duplicator?",
-      options: [
-        "A fully automatic key duplicator is easily damaged and replacement parts are expensive.",
-        "A fully automatic key duplicator can be used only for specialized, custom keys.",
-        "A fully automatic key duplicator requires annual permits and training.",
-        "A fully automatic key duplicator isn’t a good option when a customer needs an irregular, damaged, or uncommon key duplicated."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "Why would locksmiths need to wear protective eyewear around a key duplication machine if they already wear glasses?",
-      options: [
-        "Protective eyewear is a state and federal safety requirement.",
-        "Protective eyewear protects your eyes from the smoke generated.",
-        "Protective eyewear protects your eyes from the glare of LED buttons.",
-        "Protective eyewear wraps around the sides of your eyes so they're not exposed to flying metal shards."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "Why is the flip gauge such an important component in a key duplication machine?",
-      options: [
-        "It holds the carriage in place to guide the locksmith with precision.",
-        "It ensures the blade doesn’t move out of place during operation.",
-        "It holds the key blank in place so it doesn’t become loose.",
-        "It ensures that the stylus and the blade are lined up identically."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "What should you do if you can't identify the exact key blank that matches the original key?",
-      options: [
-        "Try to match the key bow with a key in the key blank board.",
-        "Contact the manufacturer of the original key and ask for a recommendation.",
-        "Don’t attempt to duplicate the key if you can’t find an exact blank.",
-        "Select a matching blank from a key blank board at random."
-      ],
-      correctIndex: 0
-    },
-    {
-      question: "How should you hold a key in the vise when cutting it?",
-      options: [
-        "Place the key in the vise so that only the tip of the bow is in view.",
-        "Place the key in the vise so that only the area to be cut by the blade is in view.",
-        "Place the key in the vise so that grooves in the original key are in complete view.",
-        "Place the key in the vise so that the tip of the bow and the area to be cut by the blade are in view."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "What is the main difference between the smoking method and the marking pen method?",
-      options: [
-        "In the smoking method, the original key is put under a flame and the outline from the smoke marks the blank. In the marking pen method, the locksmith outlines the cuts by hand.",
-        "In the smoking method, both keys are placed in a contained fire; in the marking pen method, the original is colored and clamped with the blank.",
-        "In the smoking method, the blank is placed under a flame and then clamped with the original so soot transfers to the blank. In the marking pen method, the locksmith traces the outline and transfers it.",
-        "In the smoking method, the key cuts are outlined by smoke from a candle flame. In the marking pen method, a scribe draws across the original key and leaves an outline on a colored key blank."
-      ],
-      correctIndex: 3
-    },
-    {
-      question: "How should you stand to ensure a straight file stroke?",
-      options: [
-        "Stand with both feet together in front of the vise.",
-        "Stand with your left foot ahead of your right foot if you’re right-handed (and switch if you’re left-handed).",
-        "Stand with your right foot ahead of your left foot if you’re right-handed (and switch if you’re left-handed).",
-        "Stand with your legs parallel and shoulder-width apart."
-      ],
-      correctIndex: 1
-    },
-    {
-      question:
-        "When inspecting a duplicate key, how should you measure and check the sample key?",
-      options: [
-        "For all key types, make sure the depth of each cut is identical to the sample.",
-        "For flat, bit, or barrel keys, make sure the depth of the cuts is identical; for cylinder keys, make sure the dimensions of each cut are identical.",
-        "For all key types, compare the cuts against the dimensions of the key blank board.",
-        "For flat, bit, or barrel keys, make sure the dimensions of the cuts are square to each other and identical to the original. For cylinder keys, make sure the depth of each cut is identical to the sample key."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "Why is automotive locksmithing the hardest inventory to predict and the most expensive?",
-      options: [
-        "The types of keys vary greatly depending on the car manufacturer and year.",
-        "Regulations require additional insurance for automotive keys.",
-        "Automotive keys use metal and plastic that make duplication difficult.",
-        "The use of transponders and EEPROM makes it difficult to create, duplicate, and program automotive keys."
-      ],
-      correctIndex: 3
-    },
-    {
-      question: "Why is it important to organize your keys?",
-      options: [
-        "It's important if you’ll be having apprentices in your shop.",
-        "It's important because it’s an industry requirement.",
-        "It's important in case another locksmith must take over your jobs.",
-        "It's important so you know where the keys are, which ones to restock, and where the high-volume keys are located."
-      ],
-      correctIndex: 3
-    },
-    {
-      question: "How should you organize your key board?",
-      options: [
-        "Arrange the key board like your key blank directory, and then customize the organization to fit your business needs.",
-        "Arrange the key board so that the high-volume keys are at the top of the board.",
-        "Arrange the key board according to your preferences, but make sure to record the layout for reference.",
-        "Arrange the key board like your key blank directory, alphabetize the keys, and then arrange brands in numeric order."
-      ],
-      correctIndex: 0
-    },
-    {
-      question:
-        "How does using plastic bins help with the restocking of high-volume keys?",
-      options: [
-        "Plastic bins prevent rust, which could damage your keys.",
-        "Plastic bins are cheap and can be replaced easily.",
-        "You can write the key brands on each plastic bin for easy identification.",
-        "Have a bin for each high-volume brand so you can locate keys easily and immediately see when to reorder."
-      ],
-      correctIndex: 3
-    }
-  ],
-
-  "Duplicating a Cylinder Key": [
-    {
-      question:
-        "On a typical disk tumbler lock, the depth for each cut differs by what dimension?",
-      options: ["0.010 inch", "0.0020 inch", "0.025 inch", "0.015 inch"],
-      correctIndex: 3
-    },
-    {
-      question: "What are two main components of a micrometer (in this context)?",
-      options: [
-        "Key blade and calibrated scale",
-        "V-shaped block and key blade",
-        "Cutting wheel and stylus",
-        "Calibrated scale and V-shaped block"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "When you cut code keys by machine, what adjustment must you perform after you put the V-type cutting wheel in place and install the V-shaped guide?",
-      options: [
-        "Mount your spacer key in the right-hand vise.",
-        "Mount the blank key in the left-hand vise.",
-        "Align the shoulder of the blank key in the left-hand vise.",
-        "Set the micrometer to zero."
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "If you do not have the original key or lock, what two components will allow you to re-create just about any type of key?",
-      options: [
-        "Spacer key and guide",
-        "Key blank and stylus",
-        "Calibrated scale and stylus",
-        "Spacer key and micrometer V-guide adjustment"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "When a customer asks you to rekey a lock, what actions must you perform?",
-      options: [
-        "Remove existing locks, assemble a new lock, and cut a new key",
-        "Disassemble the lock, replace disk/wafers or pins, and rekey the original key",
-        "Add new pins to the lock and cut a new key",
-        "Disassemble the lock, replace or realign disks/wafers or pins, and cut a new key"
-      ],
-      correctIndex: 3
-    },
-    {
-      question: "How many disks must you switch out on a typical disk tumbler lock?",
-      options: [
-        "One out of five",
-        "Four out of five",
-        "Three out of five",
-        "Two out of five"
-      ],
-      correctIndex: 3
-    },
-    {
-      question:
-        "Why do side bar wafer locks make up so much of locksmith work?",
-      options: [
-        "They have many uses.",
-        "They're used in many cars and trucks.",
-        "They're preferred by customers.",
-        "They're easy to assemble."
-      ],
-      correctIndex: 1
-    },
-    {
-      question: "Why should you use WD-40 to lightly lubricate a lock?",
-      options: [
-        "It doesn't cause build-up of dust and dirt.",
-        "It's multi-purpose.",
-        "It's environmentally safe.",
-        "It's cheap."
-      ],
-      correctIndex: 0
-    },
-    {
-      question: "A hardware schedule:",
-      options: [
-        "Lists locking hardware and the keying schedule.",
-        "Identifies all keys and locks used within a building.",
-        "Ensures all locking systems follow building code guidelines.",
-        "Alerts you when lock replacement and maintenance are needed."
-      ],
-      correctIndex: 0
-    },
-    {
-      question: "Why should you keep a master key system to the smallest size possible?",
-      options: [
-        "It’s easier to repair and maintain.",
-        "It’s less expensive.",
-        "It’s the industry standard.",
-        "It’s more difficult to key pick."
-      ],
-      correctIndex: 0
-    },
-    {
-      question:
-        "How can double step progression prevent key picking?",
-      options: [
-        "Double number patterns",
-        "Consistent depth of cuts",
-        "Prevents deep cuts next to shallow cuts",
-        "Two pin sizes between keys"
-      ],
-      correctIndex: 2
-    }
-  ]
-};
-
-
-      // ===== 2. State ==================================
-
-      let currentTopic = null;
-      let currentIndex = 0;
-      let selectedIndex = null;
-      let checked = false;
-
-      const scores = {}; // { topic: { correct: n, total: m } }
-
-      // ===== 3. DOM refs ==================================
-
-      const topicListEl = document.getElementById("topicList");
-      const topicTitleEl = document.getElementById("topicTitle");
-      const progressTextEl = document.getElementById("progressText");
-      const questionTextEl = document.getElementById("questionText");
-      const optionsListEl = document.getElementById("optionsList");
-      const checkBtn = document.getElementById("checkBtn");
-      const nextBtn = document.getElementById("nextBtn");
-      const feedbackEl = document.getElementById("feedback");
-      const scoreTextEl = document.getElementById("scoreText");
-
-      // ===== 4. Render topics sidebar ====================
-
-      function renderTopics() {
-        topicListEl.innerHTML = "";
-        Object.keys(quizData).forEach((topicName, idx) => {
-          const btn = document.createElement("button");
-          btn.textContent = topicName;
-          btn.className = "topic-btn" + (idx === 0 ? " active" : "");
-          btn.addEventListener("click", () => selectTopic(topicName));
-          topicListEl.appendChild(btn);
-        });
-
-        // auto-select first topic
-        const firstTopic = Object.keys(quizData)[0];
-        if (firstTopic) {
-          selectTopic(firstTopic);
+  // ===== 1. Иерархические данные: Модуль → Подтема → Вопросы =====
+  const quizTree = {
+    "1. Introduction to Keys": {
+      "Working as a Professional Locksmith": [
+        {
+          question:
+            "What's the advantage of going to a locksmith to duplicate a key rather than using a self-serve store kiosk?",
+          options: [
+            "Locksmiths are able to duplicate keys much more cheaply than kiosks.",
+            "Keys made from kiosks typically break within the first three months.",
+            "Kiosks only allow you to make a single copy of a key.",
+            "Locksmiths offer a much wider variety of key blanks."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "When would a company with an onsite safe typically need the services of a locksmith?",
+          options: [
+            "When there are more than the usual amount of valuables inside it",
+            "Every year, to comply with federal law",
+            "Only after a security incident such as an attempted break-in",
+            "When one or more employees leave the company"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "What does the largest portion of a locksmith's business usually come from?",
+          options: [
+            "Repairing damaged locks",
+            "Helping locked-out drivers get back into their cars",
+            "Installing burglar alarms at commercial locations",
+            "Residential front door lock installations and replacements"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "What role does burglar alarm installation play for a locksmith?",
+          options: [
+            "It's becoming less important as more customers use dedicated home security companies.",
+            "It's a growing area of specialization for locksmiths as the demand for burglar alarms rises.",
+            "It's typically not an area of focus because alarms require specialized electrical and wiring knowledge.",
+            "It's a declining area as more residential customers purchase easy-to-use wifi monitoring systems."
+          ],
+          correctIndex: 1
+        },
+        {
+          question:
+            "What approach do most locksmiths take regarding specialization?",
+          options: [
+            "Focus on as many areas as possible to get the most business.",
+            "Focus on just one specific type of key and lock.",
+            "Learn all there is to know about all locks, then select an area of interest.",
+            "Focus on just one or two areas of locksmithing and become very good at those."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "What do recent statistics show about burglaries in homes and retail locations?",
+          options: [
+            "Most burglars are skilled at picking locks and bypassing security measures.",
+            "Most burglaries occur in retail settings rather than residential settings.",
+            "Most burglaries are violent crimes in which the burglar is armed and dangerous.",
+            "Most burglars are amateurs with no training who are just taking advantage of a vulnerability."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "A security company is looking for a locksmith who focuses on security consulting. What should you expect most of your work to include?",
+          options: [
+            "Installing locks and security systems onsite",
+            "Repairing damaged locks and helping customers when they're locked out",
+            "Developing new security products for the industry",
+            "Offering recommendations on products and techniques that can improve security"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "What can you as a locksmith do proactively to help prevent crime?",
+          options: [
+            "Learn as much about every type of lock as possible.",
+            "Show up as quickly as possible when receiving a call about a security problem.",
+            "Focus on relatively safe neighborhoods with historically lower crime rates.",
+            "Stay current on crime trends and new product developments and offer recommendations."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "You are arriving at the residence of a new customer for the first time. What's the best way to conduct yourself?",
+          options: [
+            "Focus primarily on getting the work done quickly and minimizing interactions.",
+            "Point out any problems you find from prior locksmiths to help portray yourself as a true expert.",
+            "Respect the customer's privacy by minimizing your questions and only answering when asked.",
+            "Keep your level of interaction high and demonstrate your personal skills just as strongly as your technical skills."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "What approach should you take regarding the tools and equipment in your vehicle when making a service call?",
+          options: [
+            "Organize your gear only in a way that allows you to complete the job as quickly as possible.",
+            "Store your gear however you're most comfortable; customers only care that the job is done well.",
+            "Try to travel with minimal gear so that there's never an opportunity to look disorganized.",
+            "Everything needs to look clean and organized, even if it takes extra effort to do so."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "What physical requirements exist for someone who is interested in the locksmithing profession?",
+          options: [
+            "Having 20/20 vision or better without corrective lenses",
+            "The ability to lift and carry up to 25 pounds without assistance",
+            "Extremely good hearing and hand-eye coordination",
+            "None, as long as you have the ability to see small parts clearly"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "A customer calls you with an urgent request, but you can't accommodate her because you're on another job. What should you do?",
+          options: [
+            "Ask the customer you're currently working for if they mind if you leave to help the caller, and then quickly return.",
+            "Tell the caller you'll call her back when you're done with your current job.",
+            "Ask her if she wouldn't mind calling you again in about an hour, since that's when you expect you'll be free.",
+            "Recommend another locksmith who might be able to help immediately and thank her for calling."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "What becomes more important for a locksmith serving a rather small community than for a locksmith in a large city?",
+          options: [
+            "Offering good prices",
+            "Having a reputation as being friendly",
+            "Being prompt when a call is received",
+            "Offering a wider variety of services"
+          ],
+          correctIndex: 1
+        },
+        {
+          question:
+            "A customer urgently calls because he is locked out of his house and needs your help. What's the most important thing to confirm before you open the door?",
+          options: [
+            "That the customer is able to pay for your services",
+            "That someone will be there waiting when you arrive",
+            "That the person who called is the person waiting when you arrive",
+            "That the customer has provided proof of ownership before you open the door"
+          ],
+          correctIndex: 3
         }
-      }
+      ],
 
-      // ===== 5. Topic selection ==========================
-
-      function selectTopic(topicName) {
-        currentTopic = topicName;
-        currentIndex = 0;
-        selectedIndex = null;
-        checked = false;
-
-        // update active button
-        Array.from(topicListEl.children).forEach((btn) => {
-          btn.classList.toggle("active", btn.textContent === topicName);
-        });
-
-        if (!scores[currentTopic]) {
-          scores[currentTopic] = { correct: 0, total: 0 };
+      "Introduction to Locks and Keys": [
+        {
+          question: "What security feature does a double-cylinder lock provide?",
+          options: [
+            "It requires two separate keys to be unlocked.",
+            "It requires both a key and a numeric passcode.",
+            "It's impossible to pick because of its construction.",
+            "It can be locked on either side with a key."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "What problem can result from the strike not being secured tightly enough?",
+          options: [
+            "The lock can more easily be picked with a hairpin or paperclip.",
+            "The key is more prone to breaking off inside the cylinder.",
+            "The doorknob is likely to loosen over time and possibly even fall off.",
+            "The lock can be bypassed by kicking the door in."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "What is the most commonly used type of key in homes and cars today?",
+          options: ["A tubular key", "A bit key", "A barrel key", "A cylinder key"],
+          correctIndex: 3
+        },
+        {
+          question:
+            "If a customer calls because she is unable to find the key to her luggage, what lock mechanism are you most likely to encounter?",
+          options: [
+            "A warded lock mechanism",
+            "A disc tumbler mechanism",
+            "A pin tumbler mechanism",
+            "A lever tumbler mechanism"
+          ],
+          correctIndex: 1
+        },
+        {
+          question: "What mechanism allows a combination padlock to operate?",
+          options: [
+            "A series of tumblers needs to be aligned in just the right way.",
+            "A set of flat metal plates must slide into just the right place.",
+            "A cylinder containing rectangular metal disks must be raised to the correct level.",
+            "A row of pins are moved up and down to the correct height."
+          ],
+          correctIndex: 0
+        },
+        {
+          question:
+            "What should be the first thing you ask when a customer asks you to recommend a lock?",
+          options: [
+            "What is the customer's budget?",
+            "When does the customer need it installed?",
+            "What is wrong with the current lock being used?",
+            "What is the purpose of the lock?"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "If you're recommending door security for a hospital or a facility that handicapped persons are likely to use, what type of lockset should you suggest?",
+          options: [
+            "An entrance handleset",
+            "A key-in-knob lock",
+            "A narrow stile lock",
+            "A lever lock"
+          ],
+          correctIndex: 3
+        },
+        {
+          question: "What is the defining quality of an auxiliary lock?",
+          options: [
+            "It operates by recognizing a chip embedded in the key.",
+            "It features a rotating piece of metal at the back of the lock plug.",
+            "It's an extra lock that's added for backup security.",
+            "It's secured with a bolt and can't be picked."
+          ],
+          correctIndex: 2
+        },
+        {
+          question: "What is a cam lock most often used to secure?",
+          options: ["A car", "A typical home", "A shed or outside structure", "A desk or cabinet"],
+          correctIndex: 3
+        },
+        {
+          question: "What does a key code allow a locksmith to do?",
+          options: [
+            "Change the combination to a safe",
+            "Rekey a lock on a front door",
+            "Make a copy of a key without the original",
+            "Reprogram the key fob to lock and unlock a car"
+          ],
+          correctIndex: 2
+        },
+        {
+          question:
+            "Which locksmithing procedure involves turning a key blank in a lock, examining the marks, and cutting the key along those marks?",
+          options: ["Lockpicking", "Rekeying", "Reading", "Impressioning"],
+          correctIndex: 3
+        },
+        {
+          question:
+            "A customer calls and asks for his front and back doors to be rekeyed. What will you need to do?",
+          options: [
+            "Change the internal mechanism of both locks to fit a new key",
+            "Reprogram the electronic keypads on both doors to accept a new combination",
+            "Change out the entire lock body and strike for both doors",
+            "Create two more duplicates of the key, one for each door"
+          ],
+          correctIndex: 0
+        },
+        {
+          question:
+            "In what type of situation would a 'Slim Jim' be particularly useful?",
+          options: [
+            "Picking a front door lock of a house",
+            "Removing a broken key from a cylinder",
+            "Rekeying or repairing a lock cylinder",
+            "Opening a locked car door"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "You're tasked with installing locks on several metal cabinet doors and drawers. What tool should you be sure to bring?",
+          options: ["A plug spinner", "A pinning kit", "A hole saw kit", "A double-D punch"],
+          correctIndex: 3
         }
+      ],
 
-        renderQuestion();
-      }
+      "Using Tools Safely": [
+        {
+          question:
+            "Sergio is a locksmith who operates in a professional manner. What distinguishes him from an amateur in the way he uses his tools?",
+          options: [
+            "He treats them with care and respect and puts them away properly.",
+            "He buys the most expensive tools.",
+            "He always knows where his tools are.",
+            "He has nearly every tool conceivable in his field."
+          ],
+          correctIndex: 0
+        },
+        {
+          question:
+            "Marcela is using a screwdriver whose tip doesn't fit the slot properly. What is the correct procedure?",
+          options: [
+            "Find another screwdriver that does fit properly.",
+            "Use more leverage.",
+            "Pay particular attention to avoid slippage.",
+            "Use a piece of cloth to decrease the slot size and add friction."
+          ],
+          correctIndex: 0
+        },
+        {
+          question: "What is the 'duty rating' of a ladder?",
+          options: [
+            "How much weight it can hold",
+            "The maximum length it should be extended",
+            "The conditions it's rated for (such as rain or snow)",
+            "The sort of job it's designed for (such as electrical or carpentry)"
+          ],
+          correctIndex: 0
+        },
+        {
+          question: "A ground fault occurs when:",
+          options: [
+            "Ground isn't present.",
+            "A ground lift adapter is being used.",
+            "A hot wire and ground are connected.",
+            "Neutral and ground are on the same wire."
+          ],
+          correctIndex: 2
+        },
+        {
+          question: "How many centimeters are in one meter?",
+          options: ["100", "0.1", "1,000", "10"],
+          correctIndex: 0
+        },
+        {
+          question: "One kilogram is approximately how many pounds?",
+          options: ["2.2", "0.6", "11", "5.1"],
+          correctIndex: 0
+        },
+        {
+          question: "What is the formula to calculate Celsius temperature in Fahrenheit?",
+          options: [
+            "F = 1.8C + 32",
+            "F = 2.5C",
+            "F = 9.0C + 12",
+            "F = 32 + C"
+          ],
+          correctIndex: 0
+        },
+        {
+          question:
+            "Which of the following best describes what you would use a pinning kit for?",
+          options: [
+            "Picking a lock",
+            "Opening a car door",
+            "Cutting a new key",
+            "Replacing / rekeying a pin tumbler lock"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "Which of the following is the best description of when you would use a tension wrench?",
+          options: [
+            "When replacing a pin tumbler lock",
+            "When opening a locked car",
+            "When rekeying a lock",
+            "When picking a lock"
+          ],
+          correctIndex: 3
+        },
+        {
+          question: "How does an otoscope help a locksmith?",
+          options: [
+            "By providing diffuse light to see the keyway",
+            "By providing pressure on the lock plug",
+            "By providing a dark background behind the keyway mechanism",
+            "By providing focused light to see the keyway"
+          ],
+          correctIndex: 3
+        },
+        {
+          question: "A follower dowel is another name for a:",
+          options: [
+            "Otoscope follower",
+            "Tension wrench follower",
+            "Lock pick follower",
+            "Plug follower"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "Why is a car wedge an important tool for opening a locked car?",
+          options: [
+            "It slides between the lower part of the car window and its trim and directly opens the lock.",
+            "It creates a vacuum between the lower part of the car window and its trim, which opens the lock when removed.",
+            "It can bypass newer antitheft doors that have a guard plate over the locking mechanism.",
+            "It creates a space between the lower part of the car window and its trim for inserting another tool to open the lock."
+          ],
+          correctIndex: 3
+        }
+      ],
 
-      // ===== 6. Render question ==========================
+      "Identifying Keys": [
+        {
+          question:
+            "For a duplicate key to work in a customer's lock, the blade of the ______ must be exactly the same as the customer's original in millings and size.",
+          options: ["Master key", "Spare key", "Original equipment manufacturer", "Key blank"],
+          correctIndex: 3
+        },
+        {
+          question:
+            "An aftermarket key is much cheaper to produce but has a/an ______ tolerance than an OEM key.",
+          options: ["Higher", "Medium", "Equal", "Lower"],
+          correctIndex: 0
+        },
+        {
+          question:
+            "Key types refer to the ______ of the lock and, more important, the mechanism inside the lock.",
+          options: ["Pins", "Manufacturer", "Specialty use", "Probable application"],
+          correctIndex: 3
+        },
+        {
+          question: "What are the four configurations of key/lock interaction?",
+          options: [
+            "Tubular key, 2-track key, 4-track key, patented key",
+            "Single side, double side, tubular, neuter bow",
+            "Bit, barrel, flat steel, single side",
+            "Single side, single side convenience, double side, double side convenience"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "A ______ stop at the end of the key uses the rear of the lock to halt the key from being pushed any further into the lock.",
+          options: ["Shoulder", "Blade", "Bow", "Tip"],
+          correctIndex: 3
+        },
+        {
+          question:
+            "A ______ is a cut placed on the blade of the bit or barrel key that doesn't operate any internal part in a lock but is placed to bypass blockage inside the lock.",
+          options: ["Post hole", "Shank", "Bitting", "Ward cut"],
+          correctIndex: 3
+        },
+        {
+          question:
+            "The profile or ______ is a cross section of the key blade when you're looking from bow to tip to get a visual reference representative of the keyway of the lock.",
+          options: ["Key section", "Throat cut", "Tip angle", "Silhouette"],
+          correctIndex: 0
+        },
+        {
+          question: "What are the three basic methods used to identify keys?",
+          options: [
+            "Looking at the bow shape, looking at the tip angle, looking at the key section",
+            "Looking at the key section, looking at the stop, looking at the bittings",
+            "Looking at the tip angle, names or references on the key, looking at the key patterns",
+            "Looking at the bow shape, names or references on the key, looking at the key section"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "Manufacturers spend time and money making sure their bow shape is easy to identify because:",
+          options: [
+            "It helps the locksmith.",
+            "It strengthens the key tolerance.",
+            "It prevents theft.",
+            "It's a form of advertising."
+          ],
+          correctIndex: 3
+        },
+        {
+          question: "There is no shortcut to:",
+          options: [
+            "Producing key sections.",
+            "Key bow recognition.",
+            "ILCO identification.",
+            "Key brand recognition."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "Most aftermarket key blank manufacturers produce a ______.",
+          options: [
+            "Parts directory",
+            "Key index",
+            "Key cross-reference directory",
+            "Key blank catalog"
+          ],
+          correctIndex: 3
+        },
+        {
+          question: "Where is the key index usually found?",
+          options: [
+            "In the back of the catalog",
+            "At the beginning of each section in the catalog",
+            "In its own separate catalog",
+            "In the front of the catalog"
+          ],
+          correctIndex: 0
+        },
+        {
+          question:
+            "The key profile represents the _______, where you would insert the key.",
+          options: ["Blade", "Blank", "Family", "Lock"],
+          correctIndex: 3
+        },
+        {
+          question:
+            "During the ______ process, you take a non-ILCO brand key and find the ILCO equivalent.",
+          options: ["Key indexing", "Search", "Cataloging", "Cross-referencing"],
+          correctIndex: 3
+        }
+      ],
 
-      function renderQuestion() {
-        const questions = quizData[currentTopic];
-        const q = questions[currentIndex];
+      "Keymaking": [
+        {
+          question:
+            "Which of the following statements describes the basic operation of a manual key duplicator?",
+          options: [
+            "The locksmith marks the key by hand and then places it into a jaw set.",
+            "The locksmith rotates a cutter wheel, which follows the pattern of the customer's key and transfers it to the key blank.",
+            "The locksmith uses their hands to put pressure on the blade to ensure the pattern transfers correctly.",
+            "The locksmith moves a carriage to allow a stylus to trace the original and a blade to cut the key blank to match."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "What is the one major difference between the manual key duplicator and the semi-automatic key duplicator?",
+          options: [
+            "A lever moves the stylus and the blade in unison for better accuracy.",
+            "A lever moves a spring that pulls the carriage into the stylus and traces the customer's key.",
+            "A lever moves the blade back and forth to remove material from the key blank.",
+            "A lever moves the carriage so that the locksmith doesn't have his or her hands on the carriage or the blade."
+          ],
+          correctIndex: 1
+        },
+        {
+          question:
+            "Which of these describes how the fully automatic key duplicator works?",
+          options: [
+            "The locksmith pulls a lever attached to a carriage, which moves the blade back and forth automatically.",
+            "The locksmith rotates a cutter wheel that follows the pattern of the customer's key.",
+            "The locksmith loads the customer key and the key blank into their positions and releases a spring that engages the blade and stylus automatically.",
+            "The locksmith presses a button and lets the machine duplicate the key automatically."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "Why should a locksmith have one key duplicator option in addition to the fully automatic key duplicator?",
+          options: [
+            "A fully automatic key duplicator is easily damaged and replacement parts are expensive.",
+            "A fully automatic key duplicator can be used only for specialized, custom keys.",
+            "A fully automatic key duplicator requires annual permits and training.",
+            "A fully automatic key duplicator isn’t a good option when a customer needs an irregular, damaged, or uncommon key duplicated."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "Why would locksmiths need to wear protective eyewear around a key duplication machine if they already wear glasses?",
+          options: [
+            "Protective eyewear is a state and federal safety requirement.",
+            "Protective eyewear protects your eyes from the smoke generated.",
+            "Protective eyewear protects your eyes from the glare of LED buttons.",
+            "Protective eyewear wraps around the sides of your eyes so they're not exposed to flying metal shards."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "Why is the flip gauge such an important component in a key duplication machine?",
+          options: [
+            "It holds the carriage in place to guide the locksmith with precision.",
+            "It ensures the blade doesn’t move out of place during operation.",
+            "It holds the key blank in place so it doesn’t become loose.",
+            "It ensures that the stylus and the blade are lined up identically."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "What should you do if you can't identify the exact key blank that matches the original key?",
+          options: [
+            "Try to match the key bow with a key in the key blank board.",
+            "Contact the manufacturer of the original key and ask for a recommendation.",
+            "Don’t attempt to duplicate the key if you can’t find an exact blank.",
+            "Select a matching blank from a key blank board at random."
+          ],
+          correctIndex: 0
+        },
+        {
+          question: "How should you hold a key in the vise when cutting it?",
+          options: [
+            "Place the key in the vise so that only the tip of the bow is in view.",
+            "Place the key in the vise so that only the area to be cut by the blade is in view.",
+            "Place the key in the vise so that grooves in the original key are in complete view.",
+            "Place the key in the vise so that the tip of the bow and the area to be cut by the blade are in view."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "What is the main difference between the smoking method and the marking pen method?",
+          options: [
+            "In the smoking method, the original key is put under a flame and the outline from the smoke marks the blank. In the marking pen method, the locksmith outlines the cuts by hand.",
+            "In the smoking method, both keys are placed in a contained fire; in the marking pen method, the original is colored and clamped with the blank.",
+            "In the smoking method, the blank is placed under a flame and then clamped with the original so soot transfers to the blank. In the marking pen method, the locksmith traces the outline and transfers it.",
+            "In the smoking method, the key cuts are outlined by smoke from a candle flame. In the marking pen method, a scribe draws across the original key and leaves an outline on a colored key blank."
+          ],
+          correctIndex: 3
+        },
+        {
+          question: "How should you stand to ensure a straight file stroke?",
+          options: [
+            "Stand with both feet together in front of the vise.",
+            "Stand with your left foot ahead of your right foot if you’re right-handed (and switch if you’re left-handed).",
+            "Stand with your right foot ahead of your left foot if you’re right-handed (and switch if you’re left-handed).",
+            "Stand with your legs parallel and shoulder-width apart."
+          ],
+          correctIndex: 1
+        },
+        {
+          question:
+            "When inspecting a duplicate key, how should you measure and check the sample key?",
+          options: [
+            "For all key types, make sure the depth of each cut is identical to the sample.",
+            "For flat, bit, or barrel keys, make sure the depth of the cuts is identical; for cylinder keys, make sure the dimensions of each cut are identical.",
+            "For all key types, compare the cuts against the dimensions of the key blank board.",
+            "For flat, bit, or barrel keys, make sure the dimensions of the cuts are square to each other and identical to the original. For cylinder keys, make sure the depth of each cut is identical to the sample key."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "Why is automotive locksmithing the hardest inventory to predict and the most expensive?",
+          options: [
+            "The types of keys vary greatly depending on the car manufacturer and year.",
+            "Regulations require additional insurance for automotive keys.",
+            "Automotive keys use metal and plastic that make duplication difficult.",
+            "The use of transponders and EEPROM makes it difficult to create, duplicate, and program automotive keys."
+          ],
+          correctIndex: 3
+        },
+        {
+          question: "Why is it important to organize your keys?",
+          options: [
+            "It's important if you’ll be having apprentices in your shop.",
+            "It's important because it’s an industry requirement.",
+            "It's important in case another locksmith must take over your jobs.",
+            "It's important so you know where the keys are, which ones to restock, and where the high-volume keys are located."
+          ],
+          correctIndex: 3
+        },
+        {
+          question: "How should you organize your key board?",
+          options: [
+            "Arrange the key board like your key blank directory, and then customize the organization to fit your business needs.",
+            "Arrange the key board so that the high-volume keys are at the top of the board.",
+            "Arrange the key board according to your preferences, but make sure to record the layout for reference.",
+            "Arrange the key board like your key blank directory, alphabetize the keys, and then arrange brands in numeric order."
+          ],
+          correctIndex: 0
+        },
+        {
+          question:
+            "How does using plastic bins help with the restocking of high-volume keys?",
+          options: [
+            "Plastic bins prevent rust, which could damage your keys.",
+            "Plastic bins are cheap and can be replaced easily.",
+            "You can write the key brands on each plastic bin for easy identification.",
+            "Have a bin for each high-volume brand so you can locate keys easily and immediately see when to reorder."
+          ],
+          correctIndex: 3
+        }
+      ],
 
-        topicTitleEl.textContent = currentTopic;
-        progressTextEl.textContent = `Question ${currentIndex + 1} of ${
-          questions.length
-        }`;
+      "Duplicating a Cylinder Key": [
+        {
+          question:
+            "On a typical disk tumbler lock, the depth for each cut differs by what dimension?",
+          options: ["0.010 inch", "0.0020 inch", "0.025 inch", "0.015 inch"],
+          correctIndex: 3
+        },
+        {
+          question: "What are two main components of a micrometer (in this context)?",
+          options: [
+            "Key blade and calibrated scale",
+            "V-shaped block and key blade",
+            "Cutting wheel and stylus",
+            "Calibrated scale and V-shaped block"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "When you cut code keys by machine, what adjustment must you perform after you put the V-type cutting wheel in place and install the V-shaped guide?",
+          options: [
+            "Mount your spacer key in the right-hand vise.",
+            "Mount the blank key in the left-hand vise.",
+            "Align the shoulder of the blank key in the left-hand vise.",
+            "Set the micrometer to zero."
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "If you do not have the original key or lock, what two components will allow you to re-create just about any type of key?",
+          options: [
+            "Spacer key and guide",
+            "Key blank and stylus",
+            "Calibrated scale and stylus",
+            "Spacer key and micrometer V-guide adjustment"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "When a customer asks you to rekey a lock, what actions must you perform?",
+          options: [
+            "Remove existing locks, assemble a new lock, and cut a new key",
+            "Disassemble the lock, replace disk/wafers or pins, and rekey the original key",
+            "Add new pins to the lock and cut a new key",
+            "Disassemble the lock, replace or realign disks/wafers or pins, and cut a new key"
+          ],
+          correctIndex: 3
+        },
+        {
+          question: "How many disks must you switch out on a typical disk tumbler lock?",
+          options: [
+            "One out of five",
+            "Four out of five",
+            "Three out of five",
+            "Two out of five"
+          ],
+          correctIndex: 3
+        },
+        {
+          question:
+            "Why do side bar wafer locks make up so much of locksmith work?",
+          options: [
+            "They have many uses.",
+            "They're used in many cars and trucks.",
+            "They're preferred by customers.",
+            "They're easy to assemble."
+          ],
+          correctIndex: 1
+        },
+        {
+          question: "Why should you use WD-40 to lightly lubricate a lock?",
+          options: [
+            "It doesn't cause build-up of dust and dirt.",
+            "It's multi-purpose.",
+            "It's environmentally safe.",
+            "It's cheap."
+          ],
+          correctIndex: 0
+        },
+        {
+          question: "A hardware schedule:",
+          options: [
+            "Lists locking hardware and the keying schedule.",
+            "Identifies all keys and locks used within a building.",
+            "Ensures all locking systems follow building code guidelines.",
+            "Alerts you when lock replacement and maintenance are needed."
+          ],
+          correctIndex: 0
+        },
+        {
+          question: "Why should you keep a master key system to the smallest size possible?",
+          options: [
+            "It’s easier to repair and maintain.",
+            "It’s less expensive.",
+            "It’s the industry standard.",
+            "It’s more difficult to key pick."
+          ],
+          correctIndex: 0
+        },
+        {
+          question:
+            "How can double step progression prevent key picking?",
+          options: [
+            "Double number patterns",
+            "Consistent depth of cuts",
+            "Prevents deep cuts next to shallow cuts",
+            "Two pin sizes between keys"
+          ],
+          correctIndex: 2
+        }
+      ]
+    },
 
-        questionTextEl.textContent = q.question;
-        optionsListEl.innerHTML = "";
+    // пока добавляем только первый файл.
+    // Остальные модули уже видны в UI, но пустые — позже заполним из других docx.
+    "2. Locks and Key Mastering": {},
+    "3. Fundamentals of Home Security": {},
+    "4. Home Security Wiring": {},
+    "5. CCTV, Recording, and Detection Systems": {}
+  };
+
+  // ===== 2. Состояние =====
+  let currentModule = null;
+  let currentTopic = null;
+  let currentIndex = 0;
+  let selectedIndex = null;
+  let checked = false;
+
+  const scores = {}; // { module: { topic: {correct,total} } }
+
+  // ===== 3. DOM =====
+  const moduleListEl = document.getElementById("moduleList");
+  const topicListEl = document.getElementById("topicList");
+  const topicTitleEl = document.getElementById("topicTitle");
+  const progressTextEl = document.getElementById("progressText");
+  const questionTextEl = document.getElementById("questionText");
+  const optionsListEl = document.getElementById("optionsList");
+  const checkBtn = document.getElementById("checkBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const feedbackEl = document.getElementById("feedback");
+  const scoreTextEl = document.getElementById("scoreText");
+
+  // ===== 4. Рендер модулей (файлов) =====
+  function renderModules() {
+    moduleListEl.innerHTML = "";
+    const modules = Object.keys(quizTree);
+
+    modules.forEach((modName, idx) => {
+      const btn = document.createElement("button");
+      btn.textContent = modName;
+      btn.className = "topic-btn" + (idx === 0 ? " active" : "");
+      btn.addEventListener("click", () => selectModule(modName));
+      moduleListEl.appendChild(btn);
+    });
+
+    if (modules.length > 0) {
+      selectModule(modules[0]);
+    }
+  }
+
+  function selectModule(modName) {
+    currentModule = modName;
+    currentTopic = null;
+    currentIndex = 0;
+    selectedIndex = null;
+    checked = false;
+
+    Array.from(moduleListEl.children).forEach((btn) => {
+      btn.classList.toggle("active", btn.textContent === modName);
+    });
+
+    renderTopics();
+  }
+
+  // ===== 5. Рендер подтем =====
+  function renderTopics() {
+    topicListEl.innerHTML = "";
+    const topicsObj = quizTree[currentModule] || {};
+    const topics = Object.keys(topicsObj);
+
+    topicTitleEl.textContent = currentModule;
+
+    if (topics.length === 0) {
+      questionTextEl.textContent = "No quizzes for this module yet.";
+      optionsListEl.innerHTML = "";
+      progressTextEl.textContent = "";
+      feedbackEl.textContent = "";
+      feedbackEl.className = "feedback";
+      scoreTextEl.textContent = "";
+      checkBtn.disabled = true;
+      nextBtn.disabled = true;
+      return;
+    }
+
+    topics.forEach((topicName, idx) => {
+      const btn = document.createElement("button");
+      btn.textContent = topicName;
+      btn.className = "topic-btn" + (idx === 0 ? " active" : "");
+      btn.addEventListener("click", () => selectTopic(topicName));
+      topicListEl.appendChild(btn);
+    });
+
+    selectTopic(topics[0]);
+  }
+
+  function selectTopic(topicName) {
+    currentTopic = topicName;
+    currentIndex = 0;
+    selectedIndex = null;
+    checked = false;
+
+    Array.from(topicListEl.children).forEach((btn) => {
+      btn.classList.toggle("active", btn.textContent === topicName);
+    });
+
+    if (!scores[currentModule]) scores[currentModule] = {};
+    if (!scores[currentModule][currentTopic])
+      scores[currentModule][currentTopic] = { correct: 0, total: 0 };
+
+    renderQuestion();
+  }
+
+  // ===== 6. Рендер вопроса =====
+  function renderQuestion() {
+    const questions = quizTree[currentModule][currentTopic];
+    const q = questions[currentIndex];
+
+    topicTitleEl.textContent = currentTopic;
+    progressTextEl.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+
+    questionTextEl.textContent = q.question;
+    optionsListEl.innerHTML = "";
+    feedbackEl.textContent = "";
+    feedbackEl.className = "feedback";
+    selectedIndex = null;
+    checked = false;
+
+    q.options.forEach((opt, idx) => {
+      const li = document.createElement("li");
+      li.className = "option-item";
+
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "option";
+      radio.value = idx;
+      radio.style.marginTop = "0.2rem";
+
+      radio.addEventListener("change", () => {
+        selectedIndex = idx;
+        Array.from(optionsListEl.children).forEach((item) =>
+          item.classList.remove("selected")
+        );
+        li.classList.add("selected");
         feedbackEl.textContent = "";
         feedbackEl.className = "feedback";
-        selectedIndex = null;
-        checked = false;
+      });
 
-        q.options.forEach((opt, idx) => {
-          const li = document.createElement("li");
-          li.className = "option-item";
+      const letterSpan = document.createElement("span");
+      letterSpan.className = "option-letter";
+      letterSpan.textContent = String.fromCharCode(65 + idx) + ")";
 
-          const radio = document.createElement("input");
-          radio.type = "radio";
-          radio.name = "option";
-          radio.value = idx;
-          radio.style.marginTop = "0.2rem";
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "option-label";
+      labelSpan.textContent = opt;
 
-          radio.addEventListener("change", () => {
-            selectedIndex = idx;
-            // remove highlight from all
-            Array.from(optionsListEl.children).forEach((item) =>
-              item.classList.remove("selected")
-            );
-            li.classList.add("selected");
-            feedbackEl.textContent = "";
-            feedbackEl.className = "feedback";
-          });
+      li.appendChild(radio);
+      li.appendChild(letterSpan);
+      li.appendChild(labelSpan);
+      optionsListEl.appendChild(li);
+    });
 
-          const letterSpan = document.createElement("span");
-          letterSpan.className = "option-letter";
-          letterSpan.textContent = String.fromCharCode(65 + idx) + ")";
+    checkBtn.disabled = false;
+    nextBtn.disabled = true;
+    updateScorePill();
+  }
 
-          const labelSpan = document.createElement("span");
-          labelSpan.className = "option-label";
-          labelSpan.textContent = opt;
+  // ===== 7. Проверка ответа =====
+  function checkAnswer() {
+    if (selectedIndex === null || checked) return;
 
-          li.appendChild(radio);
-          li.appendChild(letterSpan);
-          li.appendChild(labelSpan);
-          optionsListEl.appendChild(li);
-        });
+    const questions = quizTree[currentModule][currentTopic];
+    const q = questions[currentIndex];
+    const correctIdx = q.correctIndex;
 
-        checkBtn.disabled = false;
-        nextBtn.disabled = true;
-        updateScorePill();
+    const items = Array.from(optionsListEl.children);
+
+    items.forEach((li, idx) => {
+      li.classList.remove("correct", "incorrect");
+      if (idx === correctIdx) {
+        li.classList.add("correct");
+      } else if (idx === selectedIndex && idx !== correctIdx) {
+        li.classList.add("incorrect");
       }
+    });
 
-      // ===== 7. Check answer =============================
+    const isCorrect = selectedIndex === correctIdx;
+    const topicScore = scores[currentModule][currentTopic];
 
-      function checkAnswer() {
-        if (selectedIndex === null || checked) return;
+    topicScore.total += 1;
+    if (isCorrect) {
+      topicScore.correct += 1;
+      feedbackEl.textContent = "Correct ✅";
+      feedbackEl.className = "feedback correct";
+    } else {
+      feedbackEl.textContent =
+        "Not quite ❌  Correct answer: " +
+        String.fromCharCode(65 + correctIdx) +
+        ")";
+      feedbackEl.className = "feedback incorrect";
+    }
 
-        const questions = quizData[currentTopic];
-        const q = questions[currentIndex];
-        const correctIdx = q.correctIndex;
+    checked = true;
+    updateScorePill();
+    nextBtn.disabled = currentIndex >= questions.length - 1;
+  }
 
-        const items = Array.from(optionsListEl.children);
+  // ===== 8. Следующий вопрос =====
+  function nextQuestion() {
+    const questions = quizTree[currentModule][currentTopic];
+    if (currentIndex < questions.length - 1) {
+      currentIndex += 1;
+      renderQuestion();
+    }
+  }
 
-        items.forEach((li, idx) => {
-          li.classList.remove("correct", "incorrect");
-          if (idx === correctIdx) {
-            li.classList.add("correct");
-          } else if (idx === selectedIndex && idx !== correctIdx) {
-            li.classList.add("incorrect");
-          }
-        });
+  // ===== 9. Обновление счёта =====
+  function updateScorePill() {
+    const moduleScore = scores[currentModule];
+    if (!moduleScore || !moduleScore[currentTopic] || moduleScore[currentTopic].total === 0) {
+      scoreTextEl.textContent = "";
+      return;
+    }
+    const topicScore = moduleScore[currentTopic];
+    const pct = Math.round((topicScore.correct / topicScore.total) * 100);
+    scoreTextEl.textContent = `Score for "${currentTopic}": ${topicScore.correct}/${topicScore.total} (${pct}%)`;
+  }
 
-        const isCorrect = selectedIndex === correctIdx;
-        const topicScore = scores[currentTopic];
+  // ===== 10. Слушатели =====
+  checkBtn.addEventListener("click", checkAnswer);
+  nextBtn.addEventListener("click", nextQuestion);
 
-        topicScore.total += 1;
-        if (isCorrect) {
-          topicScore.correct += 1;
-          feedbackEl.textContent = "Correct ✅";
-          feedbackEl.className = "feedback correct";
-        } else {
-          feedbackEl.textContent =
-            "Not quite ❌  Correct answer: " +
-            String.fromCharCode(65 + correctIdx) +
-            ")";
-          feedbackEl.className = "feedback incorrect";
-        }
+  // ===== 11. Старт =====
+  renderModules();
+</script>
 
-        checked = true;
-        updateScorePill();
-        nextBtn.disabled = currentIndex >= questions.length - 1;
-      }
-
-      // ===== 8. Next question ============================
-
-      function nextQuestion() {
-        const questions = quizData[currentTopic];
-        if (currentIndex < questions.length - 1) {
-          currentIndex += 1;
-          renderQuestion();
-        }
-      }
-
-      // ===== 9. Score pill ===============================
-
-      function updateScorePill() {
-        const topicScore = scores[currentTopic];
-        if (!topicScore || topicScore.total === 0) {
-          scoreTextEl.textContent = "";
-          return;
-        }
-        const pct = Math.round((topicScore.correct / topicScore.total) * 100);
-        scoreTextEl.textContent = `Score for "${currentTopic}": ${topicScore.correct}/${topicScore.total} (${pct}%)`;
-      }
-
-      // ===== 10. Event listeners =========================
-
-      checkBtn.addEventListener("click", checkAnswer);
-      nextBtn.addEventListener("click", nextQuestion);
-
-      // Init
-      renderTopics();
-    </script>
   </body>
 </html>
