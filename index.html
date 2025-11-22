@@ -2160,6 +2160,7 @@
   let checked = false;
 
   const scores = {}; // { module: { topic: {correct,total} } }
+  const sessionQuestions = {}; // randomized questions per session
 
   // ===== 3. DOM =====
   const moduleListEl = document.getElementById("moduleList");
@@ -2172,6 +2173,31 @@
   const nextBtn = document.getElementById("nextBtn");
   const feedbackEl = document.getElementById("feedback");
   const scoreTextEl = document.getElementById("scoreText");
+
+  // ===== helpers =====
+  function shuffleArray(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function buildShuffledTopicQuestions(moduleName, topicName) {
+    const original = quizTree[moduleName]?.[topicName] || [];
+    // Shuffle questions and options so answers aren't locked to the same letter.
+    return shuffleArray(original).map((q) => {
+      const optionTuples = q.options.map((text, idx) => ({ text, idx }));
+      const randomized = shuffleArray(optionTuples);
+      const correctIndex = randomized.findIndex((opt) => opt.idx === q.correctIndex);
+      return {
+        ...q,
+        options: randomized.map((opt) => opt.text),
+        correctIndex
+      };
+    });
+  }
 
   // ===== 4. Рендер модулей (файлов) =====
   function renderModules() {
@@ -2242,6 +2268,12 @@
     selectedIndex = null;
     checked = false;
 
+    if (!sessionQuestions[currentModule]) sessionQuestions[currentModule] = {};
+    sessionQuestions[currentModule][currentTopic] = buildShuffledTopicQuestions(
+      currentModule,
+      currentTopic
+    );
+
     Array.from(topicListEl.children).forEach((btn) => {
       btn.classList.toggle("active", btn.textContent === topicName);
     });
@@ -2255,7 +2287,7 @@
 
   // ===== 6. Рендер вопроса =====
   function renderQuestion() {
-    const questions = quizTree[currentModule][currentTopic];
+    const questions = sessionQuestions[currentModule][currentTopic];
     const q = questions[currentIndex];
 
     topicTitleEl.textContent = currentTopic;
@@ -2311,7 +2343,7 @@
   function checkAnswer() {
     if (selectedIndex === null || checked) return;
 
-    const questions = quizTree[currentModule][currentTopic];
+    const questions = sessionQuestions[currentModule][currentTopic];
     const q = questions[currentIndex];
     const correctIdx = q.correctIndex;
 
@@ -2349,7 +2381,7 @@
 
   // ===== 8. Следующий вопрос =====
   function nextQuestion() {
-    const questions = quizTree[currentModule][currentTopic];
+    const questions = sessionQuestions[currentModule][currentTopic];
     if (currentIndex < questions.length - 1) {
       currentIndex += 1;
       renderQuestion();
