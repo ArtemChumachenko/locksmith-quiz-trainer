@@ -20,6 +20,7 @@
       <main>
         <div class="top-bar">
           <div class="topic-title" id="topicTitle">Select a topic</div>
+          <div class="progress" id="moduleStats"></div>
           <div class="progress" id="progressText"></div>
         </div>
 
@@ -34,6 +35,7 @@
               Next question →
             </button>
             <span class="score-pill" id="scoreText"></span>
+            <button class="secondary" id="resetStatsBtn">Reset stats</button>
           </div>
           <div class="feedback" id="feedback"></div>
         </div>
@@ -49,8 +51,9 @@
   let selectedIndex = null;
   let checked = false;
 
-  const scores = {}; // { module: { topic: {correct,total} } }
   const sessionQuestions = {}; // randomized questions per session
+  const STORAGE_KEY = "quizStats";
+  let storedStats = loadStats();
 
   // ===== 3. DOM =====
   const moduleListEl = document.getElementById("moduleList");
@@ -63,6 +66,8 @@
   const nextBtn = document.getElementById("nextBtn");
   const feedbackEl = document.getElementById("feedback");
   const scoreTextEl = document.getElementById("scoreText");
+  const moduleStatsEl = document.getElementById("moduleStats");
+  const resetStatsBtn = document.getElementById("resetStatsBtn");
 
   // ===== helpers =====
   function shuffleArray(arr) {
@@ -168,10 +173,6 @@
       btn.classList.toggle("active", btn.textContent === topicName);
     });
 
-    if (!scores[currentModule]) scores[currentModule] = {};
-    if (!scores[currentModule][currentTopic])
-      scores[currentModule][currentTopic] = { correct: 0, total: 0 };
-
     renderQuestion();
   }
 
@@ -183,7 +184,9 @@
     topicTitleEl.textContent = currentTopic;
     progressTextEl.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
 
-    questionTextEl.textContent = q.question;
+    const qStats = getQuestionStats(currentModule, currentTopic, q.question);
+    const qStatText = formatStat(qStats.correct, qStats.total).text;
+    questionTextEl.textContent = `${q.question} (${qStatText})`;
     optionsListEl.innerHTML = "";
     feedbackEl.textContent = "";
     feedbackEl.className = "feedback";
@@ -226,7 +229,7 @@
 
     checkBtn.disabled = false;
     nextBtn.disabled = true;
-    updateScorePill();
+    renderAggregates();
   }
 
   // ===== 7. Проверка ответа =====
@@ -249,11 +252,9 @@
     });
 
     const isCorrect = selectedIndex === correctIdx;
-    const topicScore = scores[currentModule][currentTopic];
+    recordAnswer(isCorrect);
 
-    topicScore.total += 1;
     if (isCorrect) {
-      topicScore.correct += 1;
       feedbackEl.textContent = "Correct ✅";
       feedbackEl.className = "feedback correct";
     } else {
@@ -265,7 +266,7 @@
     }
 
     checked = true;
-    updateScorePill();
+    renderAggregates();
     nextBtn.disabled = currentIndex >= questions.length - 1;
   }
 
@@ -279,20 +280,18 @@
   }
 
   // ===== 9. Обновление счёта =====
-  function updateScorePill() {
-    const moduleScore = scores[currentModule];
-    if (!moduleScore || !moduleScore[currentTopic] || moduleScore[currentTopic].total === 0) {
-      scoreTextEl.textContent = "";
-      return;
-    }
-    const topicScore = moduleScore[currentTopic];
-    const pct = Math.round((topicScore.correct / topicScore.total) * 100);
-    scoreTextEl.textContent = `Score for "${currentTopic}": ${topicScore.correct}/${topicScore.total} (${pct}%)`;
+  function resetStats() {
+    if (!confirm("Reset all quiz statistics?")) return;
+    storedStats = { questionStats: {} };
+    saveStats();
+    renderAggregates();
+    renderQuestion();
   }
 
   // ===== 10. Слушатели =====
   checkBtn.addEventListener("click", checkAnswer);
   nextBtn.addEventListener("click", nextQuestion);
+  resetStatsBtn.addEventListener("click", resetStats);
 
   // ===== 11. Старт =====
   renderModules();
@@ -300,3 +299,75 @@
 
   </body>
 </html>
+  function loadStats() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : { questionStats: {} };
+    } catch (e) {
+      return { questionStats: {} };
+    }
+  }
+
+  function saveStats() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(storedStats));
+  }
+
+  function getQuestionStats(moduleName, topicName, questionText) {
+    const qs = storedStats.questionStats;
+    if (!qs[moduleName]) qs[moduleName] = {};
+    if (!qs[moduleName][topicName]) qs[moduleName][topicName] = {};
+    if (!qs[moduleName][topicName][questionText])
+      qs[moduleName][topicName][questionText] = { correct: 0, total: 0 };
+    return qs[moduleName][topicName][questionText];
+  }
+
+  function getTopicTotals(moduleName, topicName) {
+    const questions = quizTree[moduleName]?.[topicName] || [];
+    return questions.reduce(
+      (acc, q) => {
+        const stats = getQuestionStats(moduleName, topicName, q.question);
+        acc.correct += stats.correct;
+        acc.total += stats.total;
+        return acc;
+      },
+      { correct: 0, total: 0 }
+    );
+  }
+
+  function getModuleTotals(moduleName) {
+    const topics = Object.keys(quizTree[moduleName] || {});
+    return topics.reduce(
+      (acc, topic) => {
+        const totals = getTopicTotals(moduleName, topic);
+        acc.correct += totals.correct;
+        acc.total += totals.total;
+        return acc;
+      },
+      { correct: 0, total: 0 }
+    );
+  }
+
+  function recordAnswer(isCorrect) {
+    const questions = sessionQuestions[currentModule][currentTopic];
+    const q = questions[currentIndex];
+    const stats = getQuestionStats(currentModule, currentTopic, q.question);
+    stats.total += 1;
+    if (isCorrect) stats.correct += 1;
+    saveStats();
+  }
+
+  function formatStat(correct, total) {
+    const pct = total ? Math.round((correct / total) * 100) : 0;
+    return { pct, text: `${correct}/${total} (${pct}%)` };
+  }
+
+  function renderAggregates() {
+    const topicTotals = getTopicTotals(currentModule, currentTopic);
+    const moduleTotals = getModuleTotals(currentModule);
+
+    const topicStat = formatStat(topicTotals.correct, topicTotals.total);
+    scoreTextEl.textContent = `Topic: ${topicStat.text}`;
+
+    const moduleStat = formatStat(moduleTotals.correct, moduleTotals.total);
+    moduleStatsEl.textContent = `Module: ${moduleStat.text}`;
+  }
