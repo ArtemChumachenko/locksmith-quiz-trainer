@@ -53,6 +53,7 @@
 
   const sessionQuestions = {}; // randomized questions per session
   const STORAGE_KEY = "quizStats";
+  let storageEnabled = true;
   let storedStats = loadStats();
 
   // ===== 3. DOM =====
@@ -304,12 +305,18 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : { questionStats: {} };
     } catch (e) {
+      storageEnabled = false;
       return { questionStats: {} };
     }
   }
 
   function saveStats() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(storedStats));
+    if (!storageEnabled) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedStats));
+    } catch (e) {
+      storageEnabled = false;
+    }
   }
 
   function getQuestionStats(moduleName, topicName, questionText) {
