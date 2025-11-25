@@ -42,6 +42,14 @@
       </main>
     </div>
 
+    <div class="modal-overlay" id="resultModal">
+      <div class="modal">
+        <h3 id="resultTitle">Results</h3>
+        <p id="resultBody"></p>
+        <button class="primary" id="closeModalBtn">Close</button>
+      </div>
+    </div>
+
     <script src="quiz-data.js"></script>
     <script>
   // ===== 2. Состояние =====
@@ -52,6 +60,7 @@
   let checked = false;
 
   const sessionQuestions = {}; // randomized questions per session
+  const sessionScores = {}; // {module:{topic:{correct,total}}} for current run
   const STORAGE_KEY = "quizStats";
   let storageEnabled = true;
   let storedStats = null;
@@ -69,6 +78,10 @@
   const scoreTextEl = document.getElementById("scoreText");
   const moduleStatsEl = document.getElementById("moduleStats");
   const resetStatsBtn = document.getElementById("resetStatsBtn");
+  const resultModal = document.getElementById("resultModal");
+  const resultTitleEl = document.getElementById("resultTitle");
+  const resultBodyEl = document.getElementById("resultBody");
+  const closeModalBtn = document.getElementById("closeModalBtn");
 
   // ===== helpers =====
   function loadStats() {
@@ -248,6 +261,8 @@
       currentModule,
       currentTopic
     );
+    if (!sessionScores[currentModule]) sessionScores[currentModule] = {};
+    sessionScores[currentModule][currentTopic] = { correct: 0, total: 0 };
 
     Array.from(topicListEl.children).forEach((btn) => {
       btn.classList.toggle("active", btn.textContent === topicName);
@@ -333,6 +348,9 @@
 
     const isCorrect = selectedIndex === correctIdx;
     recordAnswer(isCorrect);
+    const sessionScore = sessionScores[currentModule][currentTopic];
+    sessionScore.total += 1;
+    if (isCorrect) sessionScore.correct += 1;
 
     if (isCorrect) {
       feedbackEl.textContent = "Correct ✅";
@@ -347,7 +365,11 @@
 
     checked = true;
     renderAggregates();
-    nextBtn.disabled = currentIndex >= questions.length - 1;
+    const isLast = currentIndex >= questions.length - 1;
+    nextBtn.disabled = isLast;
+    if (isLast) {
+      showResultModal();
+    }
   }
 
   // ===== 8. Следующий вопрос =====
@@ -368,10 +390,29 @@
     renderQuestion();
   }
 
+  function showResultModal() {
+    const sessionScore = sessionScores[currentModule][currentTopic];
+    const pct = sessionScore.total
+      ? Math.round((sessionScore.correct / sessionScore.total) * 100)
+      : 0;
+    const status = pct >= 75 ? "PASS" : "NO PASS";
+    resultTitleEl.textContent = `Result: ${status}`;
+    resultBodyEl.textContent = `Correct: ${sessionScore.correct}/${sessionScore.total} (${pct}%)`;
+    resultModal.classList.add("open");
+  }
+
+  function closeModal() {
+    resultModal.classList.remove("open");
+  }
+
   // ===== 10. Слушатели =====
   checkBtn.addEventListener("click", checkAnswer);
   nextBtn.addEventListener("click", nextQuestion);
   resetStatsBtn.addEventListener("click", resetStats);
+  closeModalBtn.addEventListener("click", closeModal);
+  resultModal.addEventListener("click", (e) => {
+    if (e.target === resultModal) closeModal();
+  });
 
   // ===== 11. Старт =====
   storedStats = loadStats();
