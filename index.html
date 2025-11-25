@@ -54,7 +54,7 @@
   const sessionQuestions = {}; // randomized questions per session
   const STORAGE_KEY = "quizStats";
   let storageEnabled = true;
-  let storedStats = loadStats();
+  let storedStats = null;
 
   // ===== 3. DOM =====
   const moduleListEl = document.getElementById("moduleList");
@@ -71,6 +71,85 @@
   const resetStatsBtn = document.getElementById("resetStatsBtn");
 
   // ===== helpers =====
+  function loadStats() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : { questionStats: {} };
+    } catch (e) {
+      storageEnabled = false;
+      return { questionStats: {} };
+    }
+  }
+
+  function saveStats() {
+    if (!storageEnabled) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedStats));
+    } catch (e) {
+      storageEnabled = false;
+    }
+  }
+
+  function getQuestionStats(moduleName, topicName, questionText) {
+    const qs = storedStats.questionStats;
+    if (!qs[moduleName]) qs[moduleName] = {};
+    if (!qs[moduleName][topicName]) qs[moduleName][topicName] = {};
+    if (!qs[moduleName][topicName][questionText])
+      qs[moduleName][topicName][questionText] = { correct: 0, total: 0 };
+    return qs[moduleName][topicName][questionText];
+  }
+
+  function getTopicTotals(moduleName, topicName) {
+    const questions = quizTree[moduleName]?.[topicName] || [];
+    return questions.reduce(
+      (acc, q) => {
+        const stats = getQuestionStats(moduleName, topicName, q.question);
+        acc.correct += stats.correct;
+        acc.total += stats.total;
+        return acc;
+      },
+      { correct: 0, total: 0 }
+    );
+  }
+
+  function getModuleTotals(moduleName) {
+    const topics = Object.keys(quizTree[moduleName] || {});
+    return topics.reduce(
+      (acc, topic) => {
+        const totals = getTopicTotals(moduleName, topic);
+        acc.correct += totals.correct;
+        acc.total += totals.total;
+        return acc;
+      },
+      { correct: 0, total: 0 }
+    );
+  }
+
+  function recordAnswer(isCorrect) {
+    const questions = sessionQuestions[currentModule][currentTopic];
+    const q = questions[currentIndex];
+    const stats = getQuestionStats(currentModule, currentTopic, q.question);
+    stats.total += 1;
+    if (isCorrect) stats.correct += 1;
+    saveStats();
+  }
+
+  function formatStat(correct, total) {
+    const pct = total ? Math.round((correct / total) * 100) : 0;
+    return { pct, text: `${correct}/${total} (${pct}%)` };
+  }
+
+  function renderAggregates() {
+    const topicTotals = getTopicTotals(currentModule, currentTopic);
+    const moduleTotals = getModuleTotals(currentModule);
+
+    const topicStat = formatStat(topicTotals.correct, topicTotals.total);
+    scoreTextEl.textContent = `Topic: ${topicStat.text}`;
+
+    const moduleStat = formatStat(moduleTotals.correct, moduleTotals.total);
+    moduleStatsEl.textContent = `Module: ${moduleStat.text}`;
+  }
+
   function shuffleArray(arr) {
     const copy = [...arr];
     for (let i = copy.length - 1; i > 0; i--) {
@@ -295,86 +374,9 @@
   resetStatsBtn.addEventListener("click", resetStats);
 
   // ===== 11. Старт =====
+  storedStats = loadStats();
   renderModules();
 </script>
 
   </body>
 </html>
-  function loadStats() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : { questionStats: {} };
-    } catch (e) {
-      storageEnabled = false;
-      return { questionStats: {} };
-    }
-  }
-
-  function saveStats() {
-    if (!storageEnabled) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedStats));
-    } catch (e) {
-      storageEnabled = false;
-    }
-  }
-
-  function getQuestionStats(moduleName, topicName, questionText) {
-    const qs = storedStats.questionStats;
-    if (!qs[moduleName]) qs[moduleName] = {};
-    if (!qs[moduleName][topicName]) qs[moduleName][topicName] = {};
-    if (!qs[moduleName][topicName][questionText])
-      qs[moduleName][topicName][questionText] = { correct: 0, total: 0 };
-    return qs[moduleName][topicName][questionText];
-  }
-
-  function getTopicTotals(moduleName, topicName) {
-    const questions = quizTree[moduleName]?.[topicName] || [];
-    return questions.reduce(
-      (acc, q) => {
-        const stats = getQuestionStats(moduleName, topicName, q.question);
-        acc.correct += stats.correct;
-        acc.total += stats.total;
-        return acc;
-      },
-      { correct: 0, total: 0 }
-    );
-  }
-
-  function getModuleTotals(moduleName) {
-    const topics = Object.keys(quizTree[moduleName] || {});
-    return topics.reduce(
-      (acc, topic) => {
-        const totals = getTopicTotals(moduleName, topic);
-        acc.correct += totals.correct;
-        acc.total += totals.total;
-        return acc;
-      },
-      { correct: 0, total: 0 }
-    );
-  }
-
-  function recordAnswer(isCorrect) {
-    const questions = sessionQuestions[currentModule][currentTopic];
-    const q = questions[currentIndex];
-    const stats = getQuestionStats(currentModule, currentTopic, q.question);
-    stats.total += 1;
-    if (isCorrect) stats.correct += 1;
-    saveStats();
-  }
-
-  function formatStat(correct, total) {
-    const pct = total ? Math.round((correct / total) * 100) : 0;
-    return { pct, text: `${correct}/${total} (${pct}%)` };
-  }
-
-  function renderAggregates() {
-    const topicTotals = getTopicTotals(currentModule, currentTopic);
-    const moduleTotals = getModuleTotals(currentModule);
-
-    const topicStat = formatStat(topicTotals.correct, topicTotals.total);
-    scoreTextEl.textContent = `Topic: ${topicStat.text}`;
-
-    const moduleStat = formatStat(moduleTotals.correct, moduleTotals.total);
-    moduleStatsEl.textContent = `Module: ${moduleStat.text}`;
-  }
