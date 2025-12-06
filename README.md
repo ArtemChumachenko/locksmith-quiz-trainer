@@ -1,105 +1,107 @@
 # Locksmith Quiz Trainer
 
-Добро пожаловать в репозиторий **Locksmith Quiz Trainer**! 
+Welcome to the **Locksmith Quiz Trainer** repository!
 
-## Описание
+## Overview
 
-**Locksmith Quiz Trainer** — это приложение для тренировки и изучения теоретических основ работы с замками. Этот проект создан для помощи начинающим и опытным мастерам в изучении своей профессии, углублении знаний, а также подготовки к профессиональным экзаменам.
-
----
-
-## Особенности проекта
-
-- Интерактивные тесты для оценки знаний.
-- Легкость в понимании и использовании.
-- Возможность расширения за счет добавления новых вопросов и модулей.
-- Оптимизированный код на JavaScript.
-
-## Технологии
-
-Основной язык проекта — **JavaScript**.
+**Locksmith Quiz Trainer** is a lightweight web app for practicing the theory behind working with locks. It is designed to help both new and experienced locksmiths deepen their knowledge and prepare for professional exams.
 
 ---
 
-## Установка
+## Features
 
-1. Склонируйте репозиторий:
+- Interactive quizzes to check your knowledge
+- Simple, focused interface
+- Easy to extend with new questions and modules
+- Plain JavaScript with no external dependencies
+
+## Stack
+
+The project uses **JavaScript**, **HTML**, and **CSS** only.
+
+---
+
+## Getting Started
+
+1. Clone the repository:
 
    ```bash
    git clone https://github.com/ArtemChumachenko/locksmith-quiz-trainer.git
    ```
 
-2. Перейдите в директорию проекта:
+2. Open the project directory:
 
    ```bash
    cd locksmith-quiz-trainer
    ```
 
-3. Установите зависимости (при необходимости):
+3. Open `index.html` in your browser, or serve the folder locally (for example with Python):
 
    ```bash
-   npm install
+   python3 -m http.server 3000
    ```
 
----
-
-## Использование
-
-Для запуска проекта выполните:
-
-```bash
-npm start
-```
-
-Следуйте инструкциям, отображаемым в консоли или в веб-интерфейсе.
+   Then visit `http://localhost:3000`.
 
 ---
 
-## GitHub Pages
+## Usage
 
-Этот проект развернут с помощью **GitHub Pages**. Вы можете просмотреть приложение по следующей ссылке:
-
-[Locksmith Quiz Trainer на GitHub Pages](https://ArtemChumachenko.github.io/locksmith-quiz-trainer/)
+- Open the app in your browser.
+- Start the quiz, choose answers, and review your score.
+- Update `quiz-data.js` to add or adjust questions.
 
 ---
 
-## Вклад в проект
+## Deployment
 
-Ваш вклад приветствуется! Чтобы предложить изменение, выполните следующие шаги:
+- FTP deploy option: workflow `.github/workflows/ftp-deploy.yml` uses `samkirkland/ftp-deploy-action@v4.3.0`. Set secrets `FTP_HOST`, `FTP_USER`, `FTP_PASS` (and optionally `FTP_PORT`, `FTP_SERVER_DIR`), then push to `main` or run the workflow manually.
 
-1. Создайте форк репозитория.
-2. Создайте ветку для ваших изменений:
+---
+
+## Live Site
+
+Live at: [quiz.keyrescuer.com](http://quiz.keyrescuer.com/)
+
+---
+
+## Contributing
+
+Contributions are welcome! To propose a change:
+
+1. Fork the repository.
+2. Create a feature branch:
 
    ```bash
    git checkout -b feature/my-new-feature
    ```
 
-3. Внесите изменения и зафиксируйте их:
+3. Commit your changes:
 
    ```bash
-   git commit -m "Добавил новую функциональность"
+   git commit -m "Add new feature"
    ```
 
-4. Отправьте изменения в ваш форк:
+4. Push the branch:
 
    ```bash
    git push origin feature/my-new-feature
    ```
 
-5. Создайте pull request.
+5. Open a pull request.
 
 ---
 
-## Лицензия
+## License
 
-В данный момент лицензия для проекта не указана. Вы можете добавить информацию о лицензии в будущем.
-
----
-
-## Автор
-
-Автор проекта: [Artem Chumachenko](https://github.com/ArtemChumachenko)
+No license is defined yet. Feel free to add one if needed.
 
 ---
 
-Спасибо за интерес к проекту! Если у вас есть вопросы или предложения, не стесняйтесь обращаться!
+## Author
+
+Project author: [Artem Chumachenko](https://github.com/ArtemChumachenko)
+
+---
+
+Thanks for checking out the project! If you have questions or suggestions, feel free to reach out.
