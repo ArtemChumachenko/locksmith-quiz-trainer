@@ -20,7 +20,7 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
           server-dir: /keyrescuer.com/quiz/    # adjust if your root differs
-          local-dir: dist/
+          local-dir: ./                        # deploy the repo root (static files live here)
           state-name: .ftp-deploy-sync-state.json
           exclude: |
             **/.git*
