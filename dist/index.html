@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Locksmith Exam Trainer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+     <aside>
+  <div class="logo">🔐 Locksmith Exam Trainer</div>
+  <!-- Верхний ряд: модули (имена файлов) -->
+  <div class="topic-list" id="moduleList"></div>
+  <!-- Нижний ряд: подтемы внутри выбранного модуля -->
+  <div class="topic-list secondary" id="topicList"></div>
+</aside>
+
+
+      <main>
+        <div class="top-bar">
+          <div class="topic-title" id="topicTitle">Select a topic</div>
+          <div class="progress" id="moduleStats"></div>
+          <div class="progress" id="progressText"></div>
+        </div>
+
+        <div class="card">
+          <div class="question-text" id="questionText">
+            Choose a topic on the left to start the quiz.
+          </div>
+          <ul class="options" id="optionsList"></ul>
+          <div class="controls">
+            <button class="primary" id="checkBtn" disabled>✅ Check</button>
+            <button class="secondary" id="nextBtn" disabled>
+              Next question →
+            </button>
+            <span class="score-pill" id="scoreText"></span>
+            <button class="secondary" id="resetStatsBtn">Reset stats</button>
+          </div>
+          <div class="feedback" id="feedback"></div>
+        </div>
+      </main>
+    </div>
+
+    <div class="modal-overlay" id="resultModal">
+      <div class="modal">
+        <h3 id="resultTitle">Results</h3>
+        <p id="resultBody"></p>
+        <button class="primary" id="closeModalBtn">Close</button>
+      </div>
+    </div>
+
+    <script src="quiz-data.js"></script>
+    <script>
+  // ===== 2. Состояние =====
+  let currentModule = null;
+  let currentTopic = null;
+  let currentIndex = 0;
+  let selectedIndex = null;
+  let checked = false;
+
+  const sessionQuestions = {}; // randomized questions per session
+  const sessionScores = {}; // {module:{topic:{correct,total}}} for current run
+  const STORAGE_KEY = "quizStats";
+  let storageEnabled = true;
+  let storedStats = null;
+
+  // ===== 3. DOM =====
+  const moduleListEl = document.getElementById("moduleList");
+  const topicListEl = document.getElementById("topicList");
+  const topicTitleEl = document.getElementById("topicTitle");
+  const progressTextEl = document.getElementById("progressText");
+  const questionTextEl = document.getElementById("questionText");
+  const optionsListEl = document.getElementById("optionsList");
+  const checkBtn = document.getElementById("checkBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  const feedbackEl = document.getElementById("feedback");
+  const scoreTextEl = document.getElementById("scoreText");
+  const moduleStatsEl = document.getElementById("moduleStats");
+  const resetStatsBtn = document.getElementById("resetStatsBtn");
+  const resultModal = document.getElementById("resultModal");
+  const resultTitleEl = document.getElementById("resultTitle");
+  const resultBodyEl = document.getElementById("resultBody");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+
+  // ===== helpers =====
+  function loadStats() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : { questionStats: {} };
+    } catch (e) {
+      storageEnabled = false;
+      return { questionStats: {} };
+    }
+  }
+
+  function saveStats() {
+    if (!storageEnabled) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(storedStats));
+    } catch (e) {
+      storageEnabled = false;
+    }
+  }
+
+  function getQuestionStats(moduleName, topicName, questionText) {
+    const qs = storedStats.questionStats;
+    if (!qs[moduleName]) qs[moduleName] = {};
+    if (!qs[moduleName][topicName]) qs[moduleName][topicName] = {};
+    if (!qs[moduleName][topicName][questionText])
+      qs[moduleName][topicName][questionText] = { correct: 0, total: 0 };
+    return qs[moduleName][topicName][questionText];
+  }
+
+  function getTopicTotals(moduleName, topicName) {
+    const questions = quizTree[moduleName]?.[topicName] || [];
+    return questions.reduce(
+      (acc, q) => {
+        const stats = getQuestionStats(moduleName, topicName, q.question);
+        acc.correct += stats.correct;
+        acc.total += stats.total;
+        return acc;
+      },
+      { correct: 0, total: 0 }
+    );
+  }
+
+  function getModuleTotals(moduleName) {
+    const topics = Object.keys(quizTree[moduleName] || {});
+    return topics.reduce(
+      (acc, topic) => {
+        const totals = getTopicTotals(moduleName, topic);
+        acc.correct += totals.correct;
+        acc.total += totals.total;
+        return acc;
+      },
+      { correct: 0, total: 0 }
+    );
+  }
+
+  function recordAnswer(isCorrect) {
+    const questions = sessionQuestions[currentModule][currentTopic];
+    const q = questions[currentIndex];
+    const stats = getQuestionStats(currentModule, currentTopic, q.question);
+    stats.total += 1;
+    if (isCorrect) stats.correct += 1;
+    saveStats();
+  }
+
+  function formatStat(correct, total) {
+    const pct = total ? Math.round((correct / total) * 100) : 0;
+    return { pct, text: `${correct}/${total} (${pct}%)` };
+  }
+
+  function renderAggregates() {
+    const topicTotals = getTopicTotals(currentModule, currentTopic);
+    const moduleTotals = getModuleTotals(currentModule);
+
+    const topicStat = formatStat(topicTotals.correct, topicTotals.total);
+    scoreTextEl.textContent = `Topic: ${topicStat.text}`;
+
+    const moduleStat = formatStat(moduleTotals.correct, moduleTotals.total);
+    moduleStatsEl.textContent = `Module: ${moduleStat.text}`;
+  }
+
+  function shuffleArray(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function buildShuffledTopicQuestions(moduleName, topicName) {
+    const original = quizTree[moduleName]?.[topicName] || [];
+    // Shuffle questions and options so answers aren't locked to the same letter.
+    return shuffleArray(original).map((q) => {
+      const optionTuples = q.options.map((text, idx) => ({ text, idx }));
+      const randomized = shuffleArray(optionTuples);
+      const correctIndex = randomized.findIndex((opt) => opt.idx === q.correctIndex);
+      return {
+        ...q,
+        options: randomized.map((opt) => opt.text),
+        correctIndex
+      };
+    });
+  }
+
+  // ===== 4. Рендер модулей (файлов) =====
+  function renderModules() {
+    moduleListEl.innerHTML = "";
+    const modules = Object.keys(quizTree);
+
+    modules.forEach((modName, idx) => {
+      const btn = document.createElement("button");
+      btn.textContent = modName;
+      btn.className = "topic-btn" + (idx === 0 ? " active" : "");
+      btn.addEventListener("click", () => selectModule(modName));
+      moduleListEl.appendChild(btn);
+    });
+
+    if (modules.length > 0) {
+      selectModule(modules[0]);
+    }
+  }
+
+  function selectModule(modName) {
+    currentModule = modName;
+    currentTopic = null;
+    currentIndex = 0;
+    selectedIndex = null;
+    checked = false;
+
+    Array.from(moduleListEl.children).forEach((btn) => {
+      btn.classList.toggle("active", btn.textContent === modName);
+    });
+
+    renderTopics();
+  }
+
+  // ===== 5. Рендер подтем =====
+  function renderTopics() {
+    topicListEl.innerHTML = "";
+    const topicsObj = quizTree[currentModule] || {};
+    const topics = Object.keys(topicsObj);
+
+    topicTitleEl.textContent = currentModule;
+
+    if (topics.length === 0) {
+      questionTextEl.textContent = "No quizzes for this module yet.";
+      optionsListEl.innerHTML = "";
+      progressTextEl.textContent = "";
+      feedbackEl.textContent = "";
+      feedbackEl.className = "feedback";
+      scoreTextEl.textContent = "";
+      checkBtn.disabled = true;
+      nextBtn.disabled = true;
+      return;
+    }
+
+    topics.forEach((topicName, idx) => {
+      const btn = document.createElement("button");
+      btn.textContent = topicName;
+      btn.className = "topic-btn" + (idx === 0 ? " active" : "");
+      btn.addEventListener("click", () => selectTopic(topicName));
+      topicListEl.appendChild(btn);
+    });
+
+    selectTopic(topics[0]);
+  }
+
+  function selectTopic(topicName) {
+    currentTopic = topicName;
+    currentIndex = 0;
+    selectedIndex = null;
+    checked = false;
+
+    if (!sessionQuestions[currentModule]) sessionQuestions[currentModule] = {};
+    sessionQuestions[currentModule][currentTopic] = buildShuffledTopicQuestions(
+      currentModule,
+      currentTopic
+    );
+    if (!sessionScores[currentModule]) sessionScores[currentModule] = {};
+    sessionScores[currentModule][currentTopic] = { correct: 0, total: 0 };
+
+    Array.from(topicListEl.children).forEach((btn) => {
+      btn.classList.toggle("active", btn.textContent === topicName);
+    });
+
+    renderQuestion();
+  }
+
+  // ===== 6. Рендер вопроса =====
+  function renderQuestion() {
+    const questions = sessionQuestions[currentModule][currentTopic];
+    const q = questions[currentIndex];
+
+    topicTitleEl.textContent = currentTopic;
+    progressTextEl.textContent = `Question ${currentIndex + 1} of ${questions.length}`;
+
+    const qStats = getQuestionStats(currentModule, currentTopic, q.question);
+    const qStatText = formatStat(qStats.correct, qStats.total).text;
+    questionTextEl.textContent = `${q.question} (${qStatText})`;
+    optionsListEl.innerHTML = "";
+    feedbackEl.textContent = "";
+    feedbackEl.className = "feedback";
+    selectedIndex = null;
+    checked = false;
+
+    q.options.forEach((opt, idx) => {
+      const li = document.createElement("li");
+      li.className = "option-item";
+
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.name = "option";
+      radio.value = idx;
+      radio.style.marginTop = "0.2rem";
+
+      radio.addEventListener("change", () => {
+        selectedIndex = idx;
+        Array.from(optionsListEl.children).forEach((item) =>
+          item.classList.remove("selected")
+        );
+        li.classList.add("selected");
+        feedbackEl.textContent = "";
+        feedbackEl.className = "feedback";
+      });
+
+      const letterSpan = document.createElement("span");
+      letterSpan.className = "option-letter";
+      letterSpan.textContent = String.fromCharCode(65 + idx) + ")";
+
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "option-label";
+      labelSpan.textContent = opt;
+
+      li.appendChild(radio);
+      li.appendChild(letterSpan);
+      li.appendChild(labelSpan);
+      optionsListEl.appendChild(li);
+    });
+
+    checkBtn.disabled = false;
+    nextBtn.disabled = true;
+    renderAggregates();
+  }
+
+  // ===== 7. Проверка ответа =====
+  function checkAnswer() {
+    if (selectedIndex === null || checked) return;
+
+    const questions = sessionQuestions[currentModule][currentTopic];
+    const q = questions[currentIndex];
+    const correctIdx = q.correctIndex;
+
+    const items = Array.from(optionsListEl.children);
+
+    items.forEach((li, idx) => {
+      li.classList.remove("correct", "incorrect");
+      if (idx === correctIdx) {
+        li.classList.add("correct");
+      } else if (idx === selectedIndex && idx !== correctIdx) {
+        li.classList.add("incorrect");
+      }
+    });
+
+    const isCorrect = selectedIndex === correctIdx;
+    recordAnswer(isCorrect);
+    const sessionScore = sessionScores[currentModule][currentTopic];
+    sessionScore.total += 1;
+    if (isCorrect) sessionScore.correct += 1;
+
+    if (isCorrect) {
+      feedbackEl.textContent = "Correct ✅";
+      feedbackEl.className = "feedback correct";
+    } else {
+      feedbackEl.textContent =
+        "Not quite ❌  Correct answer: " +
+        String.fromCharCode(65 + correctIdx) +
+        ")";
+      feedbackEl.className = "feedback incorrect";
+    }
+
+    checked = true;
+    renderAggregates();
+    const isLast = currentIndex >= questions.length - 1;
+    nextBtn.disabled = isLast;
+    if (isLast) {
+      showResultModal();
+    }
+  }
+
+  // ===== 8. Следующий вопрос =====
+  function nextQuestion() {
+    const questions = sessionQuestions[currentModule][currentTopic];
+    if (currentIndex < questions.length - 1) {
+      currentIndex += 1;
+      renderQuestion();
+    }
+  }
+
+  // ===== 9. Обновление счёта =====
+  function resetStats() {
+    if (!confirm("Reset all quiz statistics?")) return;
+    storedStats = { questionStats: {} };
+    saveStats();
+    renderAggregates();
+    renderQuestion();
+  }
+
+  function showResultModal() {
+    const sessionScore = sessionScores[currentModule][currentTopic];
+    const pct = sessionScore.total
+      ? Math.round((sessionScore.correct / sessionScore.total) * 100)
+      : 0;
+    const status = pct >= 75 ? "PASS" : "NO PASS";
+    resultTitleEl.textContent = `Result: ${status}`;
+    resultBodyEl.textContent = `Correct: ${sessionScore.correct}/${sessionScore.total} (${pct}%)`;
+    resultModal.classList.add("open");
+  }
+
+  function closeModal() {
+    resultModal.classList.remove("open");
+  }
+
+  // ===== 10. Слушатели =====
+  checkBtn.addEventListener("click", checkAnswer);
+  nextBtn.addEventListener("click", nextQuestion);
+  resetStatsBtn.addEventListener("click", resetStats);
+  closeModalBtn.addEventListener("click", closeModal);
+  resultModal.addEventListener("click", (e) => {
+    if (e.target === resultModal) closeModal();
+  });
+
+  // ===== 11. Старт =====
+  storedStats = loadStats();
+  renderModules();
+</script>
+
+  </body>
+</html>
