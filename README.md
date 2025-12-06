@@ -95,7 +95,3 @@ Contributions are welcome! To propose a change:
 ## License
 
 No license is defined yet. Feel free to add one if needed.
-
----
-
-Thanks for checking out the project! If you have questions or suggestions, feel free to reach out.
