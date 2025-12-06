@@ -19,10 +19,8 @@ jobs:
           server: ${{ secrets.FTP_HOST }}
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
-          port: ${{ secrets.FTP_PORT || 21 }}
-          server-dir: ${{ secrets.FTP_SERVER_DIR || "/" }}
-          protocol: ftp
-          local-dir: .
+          server-dir: /keyrescuer.com/quiz/    # adjust if your root differs
+          local-dir: dist/
           state-name: .ftp-deploy-sync-state.json
           exclude: |
             **/.git*
